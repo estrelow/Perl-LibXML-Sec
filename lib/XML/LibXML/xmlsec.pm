@@ -9,6 +9,7 @@ require Exporter;
 use AutoLoader;
 
 use XML::LibXML;
+use Scalar::Util qw(blessed);
 
 use enum qw( xmlSecKeyDataFormatUnknown=0
     xmlSecKeyDataFormatBinary
@@ -70,6 +71,28 @@ sub set_pkey() {
 
 }
 
+sub signdoc() {
+
+   my $self=shift();
+   my $doc=shift();
+   my %options=@_;
+
+   my $id;
+   my $id_attr='id';
+   my $id_node;
+
+   $id=$options{'id'} if (exists $options{id});
+   $id_attr=$options{'id-attr'} if (exists $options{'id-attr'});
+   $id_node=$options{'id-node'} if (exists $options{'id-node'});
+
+   unless ($id_node) {
+      $id_node=$doc->documentElement->nodeName;
+   }
+
+   my $r=$self->XmlSecSignDoc($doc,$id,$id_attr,$id_node);
+
+   return $doc;
+}
 
 1;
 __END__
@@ -77,12 +100,13 @@ __END__
 
 =head1 NAME
 
-XML::LibXML::xmlsec - Perl bindings for xmlsec library
+XML::LibXML::xmlsec - XML signing/encription using xmlsec library
 
 =head1 SYNOPSIS
 
   use XML::LibXML::xmlsec;
   
+
  
 
 
