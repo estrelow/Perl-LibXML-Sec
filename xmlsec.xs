@@ -16,8 +16,46 @@ HERE
 
 PROTOTYPES: ENABLE
 
+BOOT:
+   # No libxml initialization here. XML::LibXML should handle that
+   LIBXML_TEST_VERSION
+
+   int ret=xmlSecInit();
+   if(ret < 0) {
+        die("Error: xmlsec intialization failed");
+   }
+   ret=xmlSecCryptoAppInit(NULL);
+   if(ret < 0) {
+        die("Error: xmlsec crypto app engine intialization failed");
+   }
+   ret=xmlSecCryptoInit();
+   if(ret < 0) {
+        die("Error: xmlsec crypto engine intialization failed");
+   }
+
+
+
+int
+InitPerlXmlSec(self)
+      SV * self
+   CODE:
+   # No libxml initialization here. XML::LibXML should handle that
+      int ret=0;
+	  ret = xmlSecCheckVersion();
+	  if (ret != 1) {
+        warn("Error: xmlsec version mismatch.\n");
+        ret=0;
+	  }
+
+	  RETVAL=ret;
+
+   OUTPUT:
+      RETVAL
+
+
 IV 
-InitKeyMgr()
+InitKeyMgr(self)
+      SV * self
    CODE:
       xmlSecKeysMngrPtr pkm = NULL;
       pkm=xmlSecKeysMngrCreate(); 
@@ -36,7 +74,8 @@ InitKeyMgr()
       RETVAL
 
 IV
-XmlSecKeyLoad(mngr,file,pass,name,format)
+XmlSecKeyLoad(self,mngr,file,pass,name,format)
+      SV * self
       IV mngr
       char * file
       char * pass
@@ -44,6 +83,56 @@ XmlSecKeyLoad(mngr,file,pass,name,format)
       xmlSecKeyDataFormat format
    CODE:
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
-      RETVAL=xmlSecAppCryptoSimpleKeysMngrKeyAndCertsLoad(pkm,file,pass,name,format);
+	  xmlSecKeyPtr key;
+
+      key = xmlSecCryptoAppKeyLoad(file, format, pass, 
+                xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
+      if (key == NULL)
+      {
+		  die ("xmlSecCryptoAppKeyLoad fail");
+      }
+
+	  int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+	  if (ret < 0) {
+		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
+	  }
+	  RETVAL=ret;
+   OUTPUT:
+      RETVAL
+
+IV
+xmlSecKeyLoadString(self,mngr,data,pass,name,format)
+      SV * self
+      IV mngr
+      char * data
+      char * pass
+      char * name
+      xmlSecKeyDataFormat format
+   CODE:
+      xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
+	  xmlSecKeyPtr key;
+      xmlSecSize s = strlen(data);
+      key=xmlSecCryptoAppKeyLoadMemory (data,s,format,pass,xmlSecCryptoAppGetDefaultPwdCallback(), NULL);
+
+      if (key == NULL)
+      {
+		  die ("xmlSecCryptoAppKeyLoad fail");
+      }
+
+	  int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+	  if (ret < 0) {
+		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
+	  }
+	  RETVAL=ret;
+
+   OUTPUT:
+      RETVAL
+
+
+char *
+XmlSecVersion(self)
+      SV * self
+   CODE:
+      RETVAL = XMLSEC_VERSION;
    OUTPUT:
       RETVAL
