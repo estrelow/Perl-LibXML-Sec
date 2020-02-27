@@ -10,45 +10,37 @@ use AutoLoader;
 
 use XML::LibXML;
 
+use enum qw( xmlSecKeyDataFormatUnknown=0
+    xmlSecKeyDataFormatBinary
+    xmlSecKeyDataFormatPem
+    xmlSecKeyDataFormatDer
+    xmlSecKeyDataFormatPkcs8Pem
+    xmlSecKeyDataFormatPkcs8Der
+    xmlSecKeyDataFormatPkcs12
+    xmlSecKeyDataFormatCertPem
+    xmlSecKeyDataFormatCertDer
+);
+
 our @ISA = qw(Exporter);
 
 our $VERSION = '0.01';
 
-sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.
 
-    my $constname;
-    our $AUTOLOAD;
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    croak "&XML::LibXML::xmlsec::constant not defined" if $constname eq 'constant';
-    my ($error, $val) = constant($constname);
-    if ($error) { croak $error; }
-    {
-	no strict 'refs';
-	# Fixed between 5.005_53 and 5.005_61
-#XXX	if ($] >= 5.00561) {
-#XXX	    *$AUTOLOAD = sub () { $val };
-#XXX	}
-#XXX	else {
-	    *$AUTOLOAD = sub { $val };
-#XXX	}
-    }
-    goto &$AUTOLOAD;
-}
 
 require XSLoader;
 XSLoader::load('XML::LibXML::xmlsec', $VERSION);
-
-# Preloaded methods go here.
-
-# Autoload methods go after =cut, and are processed by the autosplit program.
 
 
 sub new() {
    my $class=shift();
    my $self= bless {}, $class;
-   $self->{_keymgr}=InitKeyMgr;
+   my $ret=$self->InitPerlXmlSec();
+   die "Can't initializa xmlsec engine $ret" unless ($ret);
+
+   my $km=$self->InitKeyMgr();
+   die "Can't initialize xmlsec KeyManager" unless ($km);
+   $self->{_keymgr}=$km;
+
    return $self;
 }
 
@@ -58,8 +50,23 @@ sub set_pkey() {
    my %options=@_;
 
    my $secret='';
+   my $name='';
+   my $file;
 
    $secret=$options{secret} if (exists $options{secret});
+   $name=$options{name} if (exists $options{name});
+
+   if (exists $options{PEM}) {
+      $file=$options{PEM};
+      die "Can't access PEM file $file" unless (-r $file);
+      return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
+   }
+
+   if (exists $options{DER}) {
+      $file=$options{DER};
+      die "Can't access DER file $file" unless (-r $file);
+      return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatDer);
+   }
 
 }
 
@@ -70,12 +77,14 @@ __END__
 
 =head1 NAME
 
-XML::LibXML::xmlsec - Perl extension for blah blah blah
+XML::LibXML::xmlsec - Perl bindings for xmlsec library
 
 =head1 SYNOPSIS
 
   use XML::LibXML::xmlsec;
-  blah blah blah
+  
+ 
+
 
 =head1 DESCRIPTION
 
