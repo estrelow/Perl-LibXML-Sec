@@ -89,7 +89,7 @@ sub signdoc() {
       $id_node=$doc->documentElement->nodeName;
    }
 
-   my $r=$self->XmlSecSignDoc($doc,$id,$id_attr,$id_node);
+   my $r=$self->XmlSecSignDoc($doc,$id_attr,$id_node,$id);
 
    return $doc;
 }
