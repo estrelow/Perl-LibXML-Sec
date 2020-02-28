@@ -282,6 +282,7 @@ XmlSecSignDoc(self,doc, id_attr, id_name, id)
    xmlChar* nsHref;
    xmlAttrPtr attr;
    xmlNodePtr cur;
+   xmlNodePtr startNode;
 
    if (id_attr == NULL) {
 	   die( "id-attr must be specified");
@@ -321,6 +322,8 @@ XmlSecSignDoc(self,doc, id_attr, id_name, id)
 	   nodeName = buf;
 	   nsHref = NULL;
 	}
+
+	printf("Settind id attr %s for %s nodes\n",id_attr, nodeName);
     cur = xmlSecGetNextElementNode(real_doc->children);
 	while(cur != NULL) {
 		if(xmlSecAppAddIDAttr(cur, id_attr, nodeName, nsHref) < 0) {
@@ -337,7 +340,13 @@ XmlSecSignDoc(self,doc, id_attr, id_name, id)
 		die("Error: xmlsec fail to find starting node");
 	}
 	
-	ret=xmlSecDSigCtxSign(&dsigCtx, attr->parent);
+	printf("Found starting node\n");
+	startNode = xmlSecFindNode(attr->parent, "Signature", "http://www.w3.org/2000/09/xmldsig#");
+	if (startNode == NULL)
+	{
+		die( "Error: xmlsec fail to find Signature node");
+	}
+	ret=xmlSecDSigCtxSign(&dsigCtx, startNode);
 	if (ret < 0)
 	{
 		die("Error xmlsec signature failed");
