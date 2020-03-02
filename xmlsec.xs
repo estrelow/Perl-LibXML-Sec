@@ -152,15 +152,15 @@ BOOT:
 
    int ret=xmlSecInit();
    if(ret < 0) {
-        die("Error: xmlsec intialization failed");
+      die("Error: xmlsec intialization failed");
    }
    ret=xmlSecCryptoAppInit(NULL);
    if(ret < 0) {
-        die("Error: xmlsec crypto app engine intialization failed");
+      die("Error: xmlsec crypto app engine intialization failed");
    }
    ret=xmlSecCryptoInit();
    if(ret < 0) {
-        die("Error: xmlsec crypto engine intialization failed");
+      die("Error: xmlsec crypto engine intialization failed");
    }
 
 
@@ -171,13 +171,13 @@ InitPerlXmlSec(self)
    CODE:
    # No libxml initialization here. XML::LibXML should handle that
       int ret=0;
-	  ret = xmlSecCheckVersion();
-	  if (ret != 1) {
-        warn("Error: xmlsec version mismatch.\n");
-        ret=0;
-	  }
+      ret = xmlSecCheckVersion();
+      if (ret != 1) {
+         warn("Error: xmlsec version mismatch.\n");
+         ret=0;
+       }
 
-	  RETVAL=ret;
+       RETVAL=ret;
 
    OUTPUT:
       RETVAL
@@ -189,17 +189,17 @@ InitKeyMgr(self)
    CODE:
       xmlSecKeysMngrPtr pkm = NULL;
       pkm=xmlSecKeysMngrCreate(); 
-	  if (pkm == NULL) {
-		  croak("xmlSecKeysMngrCreate fail\n");
-		  RETVAL=0;
-	  } 
+      if (pkm == NULL) {
+         die("xmlSecKeysMngrCreate fail");
+         RETVAL=0;
+      } 
 
-	  if (xmlSecCryptoAppDefaultKeysMngrInit(pkm) < 0) {
-		  croak("xmlSecCryptoAppDefaultKeysMngrInit fail\n");
-		  RETVAL=0;
-	  }
+      if (xmlSecCryptoAppDefaultKeysMngrInit(pkm) < 0) {
+         die("xmlSecCryptoAppDefaultKeysMngrInit fail\n");
+         RETVAL=0;
+       }
        
-	  RETVAL=PTR2IV(pkm);
+       RETVAL=PTR2IV(pkm);
    OUTPUT:
       RETVAL
 
@@ -213,20 +213,20 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
       xmlSecKeyDataFormat format
    CODE:
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
-	  xmlSecKeyPtr key;
+      xmlSecKeyPtr key;
 
       key = xmlSecCryptoAppKeyLoad(file, format, pass, 
-                xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
+      xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
       if (key == NULL)
       {
-		  die ("xmlSecCryptoAppKeyLoad fail");
+	  die ("xmlSecCryptoAppKeyLoad fail");
       }
-
-	  int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
-	  if (ret < 0) {
-		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
+      xmlSecKeySetName(key,file);
+      int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+      if (ret < 0) {
+         die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
 	  }
-	  RETVAL=ret;
+      RETVAL=ret;
    OUTPUT:
       RETVAL
 
@@ -243,12 +243,10 @@ xmlSecKeyLoadString(self,mngr,data,pass,name,format)
 	  xmlSecKeyPtr key;
       xmlSecSize s = strlen(data);
       key=xmlSecCryptoAppKeyLoadMemory (data,s,format,pass,xmlSecCryptoAppGetDefaultPwdCallback(), NULL);
-
       if (key == NULL)
       {
-		  die ("xmlSecCryptoAppKeyLoad fail");
+	  die ("xmlSecCryptoAppKeyLoad fail");
       }
-
 	  int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
 	  if (ret < 0) {
 		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
@@ -268,9 +266,10 @@ XmlSecVersion(self)
       RETVAL
 
 int
-XmlSecSignDoc(self,doc, id_attr, id_name, id)
+XmlSecSignDoc(self,doc, mgr,id_attr, id_name, id)
    HV * self
    SV * doc
+   IV mgr
    xmlChar * id_attr;
    xmlChar * id_name;
    xmlChar * id;
@@ -285,38 +284,33 @@ XmlSecSignDoc(self,doc, id_attr, id_name, id)
    xmlNodePtr startNode;
 
    if (id_attr == NULL) {
-	   die( "id-attr must be specified");
+      die( "id-attr must be specified");
    }
 
    if (id == NULL) {
-	   die( "id must be specified");
+      die( "id must be specified");
    }
 
-   SV ** pm= hv_fetch(self,"_keymgr",7,0);
-   if (pm == NULL)
-   {
-      die ("Key Manager missing can't sign");
-   }
-   xmlSecKeysMngrPtr pkm=(xmlSecKeysMngrPtr) *pm;
+   xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mgr);
    
+   printf("Got key mgr %s\n", pkm->keysStore->id->name);
    xmlSecDSigCtx dsigCtx;
 
    ret=xmlSecDSigCtxInitialize(&dsigCtx, pkm);
    if (ret < 0)   {
-	   die("Error xmlSecDSigCtxInitialize fail");
+      die("Error xmlSecDSigCtxInitialize fail");
    }
-
 
    real_doc=(xmlDocPtr) PmmSvNode(doc);
    if (real_doc == NULL)  {
-	   die("Error: failed to get libxml doc");
+      die("Error: failed to get libxml doc");
    }
 
    /* set id atribute */
    buf = xmlStrdup(id_name);
    nodeName = (xmlChar*)strrchr((char*)buf, ':');
    if(nodeName != NULL) {
-	   (*(nodeName++)) = '\0';
+      (*(nodeName++)) = '\0';
 	   nsHref = buf;
 	} else {
 	   nodeName = buf;
