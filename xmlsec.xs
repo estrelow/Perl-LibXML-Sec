@@ -152,15 +152,15 @@ BOOT:
 
    int ret=xmlSecInit();
    if(ret < 0) {
-      die("Error: xmlsec intialization failed");
+        die("Error: xmlsec intialization failed");
    }
    ret=xmlSecCryptoAppInit(NULL);
    if(ret < 0) {
-      die("Error: xmlsec crypto app engine intialization failed");
+        die("Error: xmlsec crypto app engine intialization failed");
    }
    ret=xmlSecCryptoInit();
    if(ret < 0) {
-      die("Error: xmlsec crypto engine intialization failed");
+        die("Error: xmlsec crypto engine intialization failed");
    }
 
 
@@ -171,13 +171,13 @@ InitPerlXmlSec(self)
    CODE:
    # No libxml initialization here. XML::LibXML should handle that
       int ret=0;
-      ret = xmlSecCheckVersion();
-      if (ret != 1) {
-         warn("Error: xmlsec version mismatch.\n");
-         ret=0;
-       }
+	  ret = xmlSecCheckVersion();
+	  if (ret != 1) {
+        warn("Error: xmlsec version mismatch.\n");
+        ret=0;
+	  }
 
-       RETVAL=ret;
+	  RETVAL=ret;
 
    OUTPUT:
       RETVAL
@@ -189,17 +189,17 @@ InitKeyMgr(self)
    CODE:
       xmlSecKeysMngrPtr pkm = NULL;
       pkm=xmlSecKeysMngrCreate(); 
-      if (pkm == NULL) {
-         die("xmlSecKeysMngrCreate fail");
-         RETVAL=0;
-      } 
+	  if (pkm == NULL) {
+		  croak("xmlSecKeysMngrCreate fail\n");
+		  RETVAL=0;
+	  } 
 
-      if (xmlSecCryptoAppDefaultKeysMngrInit(pkm) < 0) {
-         die("xmlSecCryptoAppDefaultKeysMngrInit fail\n");
-         RETVAL=0;
-       }
+	  if (xmlSecCryptoAppDefaultKeysMngrInit(pkm) < 0) {
+		  croak("xmlSecCryptoAppDefaultKeysMngrInit fail\n");
+		  RETVAL=0;
+	  }
        
-       RETVAL=PTR2IV(pkm);
+	  RETVAL=PTR2IV(pkm);
    OUTPUT:
       RETVAL
 
@@ -207,26 +207,42 @@ IV
 XmlSecKeyLoad(self,mngr,file,pass,name,format)
       SV * self
       IV mngr
-      char * file
-      char * pass
-      char * name
+      xmlChar * file
+      xmlChar * pass
+      xmlChar * name
       xmlSecKeyDataFormat format
    CODE:
+      /*******************************************
+         xmlSecKeyLoad()
+
+		 Loads a key from a file into the keymanager
+
+		 Args:
+		    self
+			mngr: the key manager attached to us
+			file: the external file name
+			pass: the password for key decryption
+			name: an optional name
+         Return value:
+		    whatever xmlSecCryptoAppDefaultKeysMngrAdoptKey
+	  ********************************************/
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
-      xmlSecKeyPtr key;
+	  xmlSecKeyPtr key;
+      int ret=0;
 
       key = xmlSecCryptoAppKeyLoad(file, format, pass, 
-      xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
+                xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
       if (key == NULL)
       {
-	  die ("xmlSecCryptoAppKeyLoad fail");
+		  die ("xmlSecCryptoAppKeyLoad fail");
       }
-      xmlSecKeySetName(key,file);
-      int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
-      if (ret < 0) {
-         die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
+      ret = xmlSecKeySetName(key,  name);
+
+	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+	  if (ret < 0) {
+		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
 	  }
-      RETVAL=ret;
+	  RETVAL=ret;
    OUTPUT:
       RETVAL
 
@@ -234,20 +250,24 @@ IV
 xmlSecKeyLoadString(self,mngr,data,pass,name,format)
       SV * self
       IV mngr
-      char * data
-      char * pass
-      char * name
+      xmlChar * data
+      xmlChar * pass
+      xmlChar * name
       xmlSecKeyDataFormat format
    CODE:
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
 	  xmlSecKeyPtr key;
       xmlSecSize s = strlen(data);
+	  int ret;
+
       key=xmlSecCryptoAppKeyLoadMemory (data,s,format,pass,xmlSecCryptoAppGetDefaultPwdCallback(), NULL);
+
       if (key == NULL)
       {
-	  die ("xmlSecCryptoAppKeyLoad fail");
+		  die ("xmlSecCryptoAppKeyLoad fail");
       }
-	  int ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+      ret = xmlSecKeySetName(key,  name);
+	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
 	  if (ret < 0) {
 		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
 	  }
@@ -266,10 +286,9 @@ XmlSecVersion(self)
       RETVAL
 
 int
-XmlSecSignDoc(self,doc, mgr,id_attr, id_name, id)
+XmlSecSignDoc(self,doc, id_attr, id_name, id)
    HV * self
    SV * doc
-   IV mgr
    xmlChar * id_attr;
    xmlChar * id_name;
    xmlChar * id;
@@ -284,40 +303,44 @@ XmlSecSignDoc(self,doc, mgr,id_attr, id_name, id)
    xmlNodePtr startNode;
 
    if (id_attr == NULL) {
-      die( "id-attr must be specified");
+	   die( "id-attr must be specified");
    }
 
    if (id == NULL) {
-      die( "id must be specified");
+	   die( "id must be specified");
    }
 
-   xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mgr);
+   SV ** pm= hv_fetch(self,"_keymgr",7,0);
+   if (pm == NULL)
+   {
+      die ("Key Manager missing can't sign");
+   }
+   xmlSecKeysMngrPtr pkm=(xmlSecKeysMngrPtr) *pm;
    
-   printf("Got key mgr %s\n", pkm->keysStore->id->name);
    xmlSecDSigCtx dsigCtx;
 
    ret=xmlSecDSigCtxInitialize(&dsigCtx, pkm);
    if (ret < 0)   {
-      die("Error xmlSecDSigCtxInitialize fail");
+	   die("Error xmlSecDSigCtxInitialize fail");
    }
+
 
    real_doc=(xmlDocPtr) PmmSvNode(doc);
    if (real_doc == NULL)  {
-      die("Error: failed to get libxml doc");
+	   die("Error: failed to get libxml doc");
    }
 
    /* set id atribute */
    buf = xmlStrdup(id_name);
    nodeName = (xmlChar*)strrchr((char*)buf, ':');
    if(nodeName != NULL) {
-      (*(nodeName++)) = '\0';
+	   (*(nodeName++)) = '\0';
 	   nsHref = buf;
 	} else {
 	   nodeName = buf;
 	   nsHref = NULL;
 	}
 
-	printf("Settind id attr %s for %s nodes\n",id_attr, nodeName);
     cur = xmlSecGetNextElementNode(real_doc->children);
 	while(cur != NULL) {
 		if(xmlSecAppAddIDAttr(cur, id_attr, nodeName, nsHref) < 0) {
@@ -334,7 +357,6 @@ XmlSecSignDoc(self,doc, mgr,id_attr, id_name, id)
 		die("Error: xmlsec fail to find starting node");
 	}
 	
-	printf("Found starting node\n");
 	startNode = xmlSecFindNode(attr->parent, "Signature", "http://www.w3.org/2000/09/xmldsig#");
 	if (startNode == NULL)
 	{
