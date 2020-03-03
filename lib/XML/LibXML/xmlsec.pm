@@ -60,11 +60,13 @@ sub loadpkey() {
    if (exists $options{PEM}) {
       $file=$options{PEM};
       die "Can't access PEM file $file" unless (-r $file);
+      $name=$file unless ($name);
       return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
    }
 
    if (exists $options{DER}) {
       $file=$options{DER};
+      $name=$file unless ($name);
       die "Can't access DER file $file" unless (-r $file);
       return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatDer);
    }
@@ -89,7 +91,7 @@ sub signdoc() {
       $id_node=$doc->documentElement->nodeName;
    }
 
-   my $r=$self->XmlSecSignDoc($doc,$id_attr,$id_node,$id);
+   my $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id_attr,$id_node,$id);
 
    return $doc;
 }

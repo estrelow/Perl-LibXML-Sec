@@ -1,5 +1,8 @@
 #include <xmlsec/xmlsec.h>
 #include <xmlsec/xmldsig.h>
+#include <xmlsec/openssl/app.h>
+#include <xmlsec/xmltree.h>
+
 #include "perl-libxml-mm.h"
 
 #include "EXTERN.h"
@@ -236,7 +239,7 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
       {
 		  die ("xmlSecCryptoAppKeyLoad fail");
       }
-      ret = xmlSecKeySetName(key,  name);
+      /*ret = xmlSecKeySetName(key,  name);*/
 
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
 	  if (ret < 0) {
@@ -286,9 +289,10 @@ XmlSecVersion(self)
       RETVAL
 
 int
-XmlSecSignDoc(self,doc, id_attr, id_name, id)
-   HV * self
-   SV * doc
+XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
+   HV * self;
+   SV * doc;
+   IV mgr;
    xmlChar * id_attr;
    xmlChar * id_name;
    xmlChar * id;
@@ -315,7 +319,7 @@ XmlSecSignDoc(self,doc, id_attr, id_name, id)
    {
       die ("Key Manager missing can't sign");
    }
-   xmlSecKeysMngrPtr pkm=(xmlSecKeysMngrPtr) *pm;
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
    
    xmlSecDSigCtx dsigCtx;
 
