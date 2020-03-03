@@ -45,7 +45,7 @@ sub new() {
    return $self;
 }
 
-sub set_pkey() {
+sub loadpkey() {
 
    my $self=shift();
    my %options=@_;
@@ -89,7 +89,7 @@ sub signdoc() {
       $id_node=$doc->documentElement->nodeName;
    }
 
-   my $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id_attr,$id_node,$id);
+   my $r=$self->XmlSecSignDoc($doc,$id_attr,$id_node,$id);
 
    return $doc;
 }
@@ -106,45 +106,53 @@ XML::LibXML::xmlsec - XML signing/encription using xmlsec library
 
   use XML::LibXML::xmlsec;
   
-
- 
-
+  my $signer=XML::LibxXML::xmlsec->new();
+  $signer->loadpkey(PEM => 'jdoe.pem', secret => 'hush');
+  $signer->signdoc($xmldoc);
 
 =head1 DESCRIPTION
 
-Stub documentation for XML::LibXML::xmlsec, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+XML::LibXML::xmlsec is a bind module for xmlsec, a C library aimed for XML digital signature and encryption
+es described in W3C standards.
 
-Blah blah blah.
 
-=head2 EXPORT
+=head2 INSTALLATION
 
-None by default.
+You must have a running xmlsec library. There are binaries been ported to many Linux distributions, as
+well as binaries for Windows available.
 
-=head2 Exportable constants
 
-  xmlSecByte
-  xmlSecCheckVersionABICompatible
-  xmlSecCheckVersionExactMatch
-  xmlSecSize
+=head1 METHODS
+
+=head2 loadpkey
+
+   $signer->loadpkey(PEM => 'me.pem', secret => 'mypassword');
+   $signer->loadpkey(DER => 'me.pem', name => 'joe');
+   $signer->loadpkey(PEM => $string_with_pem);
+
+loadpkey will set the private key needed for digital signature. The key may be passed as a filename
+value, or it might be the key itself. A PEM=>val pair indicates PEM format and DER=>val indicates DER format.
+An optional secret value will be used to decrypt the key. 
+An optional name argument will be used to mention the private key in further methods.
+
+=head2 signdoc
+
+   $signer->signdoc($xmldoc);
+
+signdoc will compute the digital signature and then add it as contents to the XML document.
+The argument is expected to be a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
 
 
 
 =head1 SEE ALSO
 
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+See L<W3C XML signature definition|https://www.w3.org/TR/xmldsig-core/>.
+See L<W3C XML encryption definition|https://www.w3.org/TR/xmlenc-core/>.
+The original xmlsec library has a webpage at L<https://www.aleksey.com/xmlsec/>
 
 =head1 AUTHOR
 
-A. U. Thor, E<lt>estrelow@localdomainE<gt>
+Erich Strelow, E<lt>hstrelo@puc.clE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
