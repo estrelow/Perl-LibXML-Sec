@@ -53,24 +53,75 @@ sub loadpkey() {
    my $secret='';
    my $name='';
    my $file;
+   my $ret;
 
    $secret=$options{secret} if (exists $options{secret});
-   $name=$options{name} if (exists $options{name});
+
+   if (exists $options{name}) {
+      $name=$options{name};
+   } else {
+      $name= 'noname';
+   }
 
    if (exists $options{PEM}) {
       $file=$options{PEM};
-      die "Can't access PEM file $file" unless (-r $file);
+      croak "Can't access PEM file $file" unless (-r $file);
       $name=$file unless ($name);
-      return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
+      $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
    }
 
    if (exists $options{DER}) {
       $file=$options{DER};
       $name=$file unless ($name);
-      die "Can't access DER file $file" unless (-r $file);
-      return $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatDer);
+      croak "Can't access DER file $file" unless (-r $file);
+      $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatDer);
    }
 
+   my $pfx;
+
+   # PKCS12, PFX, P12 are equivalent
+   $pfx= $options{PKCS12} if (exists $options{PKCS12});
+   $pfx= $options{PFX} if (exists $options{PFX});
+   $pfx= $options{P12} if (exists $options{P12});
+
+   if ($pfx) {
+      $name=$pfx unless ($name);
+      croak "Can't access PKCS12 file $pfx" unless (-r $pfx);
+      $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPkcs12);
+   }
+
+   return $ret;
+
+}
+
+sub loadcert() {
+   
+   my $self=shift();
+   my %options=@_;
+
+   my $name;
+
+   if (exists $options{name}) {
+      $name=$options{name};
+   } else {
+      $name= 'noname';
+   }
+
+   my $file;
+   my $format;
+   if (exists $options{PEM}) {
+      $file=$options{PEM};
+      $format=xmlSecKeyDataFormatCertPem;
+   }
+
+   if (exists $options{DER}) {
+      $file=$options{DER};
+      $format=xmlSecKeyDataFormatCertDer;
+   }
+
+   my $secret=0;
+   $secret= $options{secret} if (exists $options{secret});
+   return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
 }
 
 sub signdoc() {
@@ -98,7 +149,6 @@ sub signdoc() {
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
@@ -133,9 +183,18 @@ well as binaries for Windows available.
    $signer->loadpkey(PEM => $string_with_pem);
 
 loadpkey will set the private key needed for digital signature. The key may be passed as a filename
-value, or it might be the key itself. A PEM=>val pair indicates PEM format and DER=>val indicates DER format.
+value, or it might be the key itself. A PEM=>val pair indicates PEM format, DER=>val indicates DER format
+and PFX=>val indicates PKCS12 format.
 An optional secret value will be used to decrypt the key. 
 An optional name argument will be used to mention the private key in further methods.
+
+=head2 loadcert
+
+   $signer->loadcert(PEM => 'me.crt', secret => 'hush')
+   $signer->loadcert(PEM => 'joe.crt', name => 'joe')
+
+loadcert will set the X509 certificate needed for verifying or digital signature. The value may be passed
+in similar fashion as in loadpkey().
 
 =head2 signdoc
 

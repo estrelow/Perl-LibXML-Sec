@@ -12,6 +12,17 @@
 #include "app.h"
 #include "crypto.h"
 
+xmlSecKeyPtr FindKey(xmlSecKeysMngrPtr mngr, xmlChar* name) {
+  
+   xmlSecKeyPtr r;
+   xmlSecKeyInfoCtxPtr ctx=xmlSecKeyInfoCtxCreate(mngr);
+   xmlSecKeyInfoCtxInitialize(ctx,mngr);
+   r= xmlSecKeysMngrFindKey(mngr, name, ctx);
+   xmlSecKeyInfoCtxDestroy(ctx);
+   return r;
+
+}
+
 /* extracts the libxml2 node from a perl reference
  */
 
@@ -239,8 +250,8 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
       {
 		  die ("xmlSecCryptoAppKeyLoad fail");
       }
-      /*ret = xmlSecKeySetName(key,  name);*/
-
+      
+	  ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
 	  if (ret < 0) {
 		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
@@ -378,3 +389,41 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
 
   OUTPUT:
    RETVAL
+
+int
+KeyCertLoad(self,mgr,name,secret,file,format) 
+   SV * self;
+   IV mgr;
+   xmlChar * name;
+   xmlChar * secret;
+   xmlChar * file;
+   xmlSecKeyDataFormat format;
+CODE:
+
+   int ret=0;
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   xmlSecKeyPtr key=FindKey(pkm,name);
+   if (key==NULL)  { /* There's no key yet */
+      key=xmlSecCryptoAppKeyLoad (file,format,secret,xmlSecCryptoAppGetDefaultPwdCallback(),file);
+      //printf ("Loaded cert as new key\n");
+	  if (key == NULL) {
+		  die ("Can't load certificate file");
+		  return 0;
+	  }
+      ret = xmlSecKeySetName(key,  name);
+	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+      
+   } else { /* we attach the certificate to the previously loaded key */
+      ret=xmlSecCryptoAppKeyCertLoad (key,file,xmlSecKeyDataFormatPem);
+      //printf ("Loaded cert as attribute\n");
+	  if (ret<0) {
+		  die("Can't load certificate file");
+	  }
+
+   }
+
+   RETVAL=ret;
+  OUTPUT:
+   RETVAL
+
+
