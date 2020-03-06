@@ -426,4 +426,14 @@ CODE:
   OUTPUT:
    RETVAL
 
-
+int
+_KeysStoreSave (self, mgr,filename,type)
+   SV * self;
+   IV mgr;
+   char * filename;
+   int type;
+CODE:
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   RETVAL=xmlSecCryptoAppDefaultKeysMngrSave  (pkm,filename,type);
+OUTPUT:
+   RETVAL

@@ -22,6 +22,18 @@ use enum qw( xmlSecKeyDataFormatUnknown=0
     xmlSecKeyDataFormatCertDer
 );
 
+#This constants will be used to filter dumped keys
+use constant xmlSecKeyDataTypeUnknown => 0x0000;
+use constant xmlSecKeyDataTypeNone => xmlSecKeyDataTypeUnknown;
+use constant xmlSecKeyDataTypePublic => 0x0001;
+use constant xmlSecKeyDataTypePrivate => 0x0002;
+use constant xmlSecKeyDataTypeSymmetric => 0x0004;
+use constant xmlSecKeyDataTypeSession => 0x0008;
+use constant xmlSecKeyDataTypePermanent => 0x0010;
+use constant xmlSecKeyDataTypeTrusted => 0x0100;
+use constant xmlSecKeyDataTypeSession => 0x0008;
+use constant xmlSecKeyDataTypeAny => 0xFFFF;
+
 our @ISA = qw(Exporter);
 
 our $VERSION = '0.01';
@@ -66,13 +78,11 @@ sub loadpkey() {
    if (exists $options{PEM}) {
       $file=$options{PEM};
       croak "Can't access PEM file $file" unless (-r $file);
-      $name=$file unless ($name);
       $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
    }
 
    if (exists $options{DER}) {
       $file=$options{DER};
-      $name=$file unless ($name);
       croak "Can't access DER file $file" unless (-r $file);
       $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatDer);
    }
@@ -85,14 +95,14 @@ sub loadpkey() {
    $pfx= $options{P12} if (exists $options{P12});
 
    if ($pfx) {
-      $name=$pfx unless ($name);
       croak "Can't access PKCS12 file $pfx" unless (-r $pfx);
-      $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPkcs12);
+      $ret= $self->XmlSecKeyLoad($self->{_keymgr},$pfx,$secret,$name,xmlSecKeyDataFormatPkcs12);
    }
 
    return $ret;
 
 }
+
 
 sub loadcert() {
    
@@ -146,6 +156,16 @@ sub signdoc() {
 
    return $doc;
 }
+
+sub KeysStoreSave($$$) {
+
+   my $self=shift();
+   my $file=shift();
+   my $type=shift();
+
+   return $self->_KeysStoreSave($self->{_keymgr},$file,$type);
+}
+
 
 1;
 __END__
@@ -203,7 +223,33 @@ in similar fashion as in loadpkey().
 signdoc will compute the digital signature and then add it as contents to the XML document.
 The argument is expected to be a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
 
+=head2 KeysStoreSave('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
 
+This will dump the current contents of the previously loaded keys in the named file.
+The second argument is a bitmask indicating which keys will be dumped. The options, as stated
+in xmlsec documentation are as follows:
+
+=over 1
+
+=item B<xmlSecKeyDataTypeUnknown> The key data type is unknown (same as xmlSecKeyDataTypeNone).
+
+=item B<xmlSecKeyDataTypeNone> The key data type is unknown (same as xmlSecKeyDataTypeUnknown).
+
+=item B<xmlSecKeyDataTypePublic> The key data contain a public key.
+
+=item B<xmlSecKeyDataTypePrivate> The key data contain a private key.
+
+=item B<xmlSecKeyDataTypeSymmetric> The key data contain a symmetric key.
+
+=item B<xmlSecKeyDataTypeSession> The key data contain session key (one time key, n
+
+=item B<xmlSecKeyDataTypePermanent> The key data contain permanent key (stored in keys manager).
+
+=item B<xmlSecKeyDataTypeTrusted> The key data is trusted.
+
+=item B<xmlSecKeyDataTypeAny> Any key data.
+
+=back
 
 =head1 SEE ALSO
 
