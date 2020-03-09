@@ -408,7 +408,6 @@ CODE:
       //printf ("Loaded cert as new key\n");
 	  if (key == NULL) {
 		  die ("Can't load certificate file");
-		  return 0;
 	  }
       ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
