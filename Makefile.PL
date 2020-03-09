@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 my $libs;
 
 if ($^O eq 'MSWin32') {
-   $libs='-lxmlsec-openssl -lxmlsec -lltdl -lxml2 -lssl -lcrypto';
+   $libs='-Lc:/perl64/site/lib/auto/MinGW/lib/ -lxmlsec1-openssl.dll -lxmlsec1.dll  -lxml2.dll';
 } else {
    $libs='-L/usr/local/lib -lxmlsec1-openssl -lxmlsec1 -lltdl  -lxml2    -lssl -lcrypto';
 }
@@ -14,7 +14,7 @@ if ($^O eq 'MSWin32') {
 WriteMakefile(
     NAME              => 'XML::LibXML::xmlsec',
     VERSION_FROM      => 'lib/XML/LibXML/xmlsec.pm', # finds $VERSION
-    PREREQ_PM         => {'XML::LibXML' => 2}, # e.g., Module::Name => 1.1
+    PREREQ_PM         => {'XML::LibXML' => 2, 'enum' >= 1 }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/XML/LibXML/xmlsec.pm', # retrieve abstract from module
        AUTHOR         => 'Erich Strelow <esf@moller.cl>') : ()),
