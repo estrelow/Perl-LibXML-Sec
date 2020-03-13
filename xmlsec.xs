@@ -161,33 +161,37 @@ HERE
 PROTOTYPES: ENABLE
 
 BOOT:
-   # No libxml initialization here. XML::LibXML should handle that
+   // No libxml initialization here. XML::LibXML should handle that
    LIBXML_TEST_VERSION
 
    int ret=xmlSecInit();
    if(ret < 0) {
-        die("Error: xmlsec intialization failed");
+        croak("Error: xmlsec intialization failed");
    }
    ret=xmlSecCryptoAppInit(NULL);
    if(ret < 0) {
-        die("Error: xmlsec crypto app engine intialization failed");
+        croak("Error: xmlsec crypto app engine intialization failed");
    }
    ret=xmlSecCryptoInit();
    if(ret < 0) {
-        die("Error: xmlsec crypto engine intialization failed");
+        croak("Error: xmlsec crypto engine intialization failed");
    }
 
 
+/********************************************************************
+   InitPerlXmlSec()
 
+   Placeholder for general xmlsec initialization
+*********************************************************************/
 int
 InitPerlXmlSec(self)
       SV * self
    CODE:
-   # No libxml initialization here. XML::LibXML should handle that
+   // No libxml initialization here. XML::LibXML should handle that
       int ret=0;
 	  ret = xmlSecCheckVersion();
 	  if (ret != 1) {
-        warn("Error: xmlsec version mismatch.\n");
+        croak("Error: xmlsec version mismatch.\n");
         ret=0;
 	  }
 
@@ -197,6 +201,12 @@ InitPerlXmlSec(self)
       RETVAL
 
 
+/********************************************************************
+   InitPerlXmlSec()
+
+   Setup the main KeyMgr object. This is needed for further method
+   calls
+*********************************************************************/
 IV 
 InitKeyMgr(self)
       SV * self
@@ -217,6 +227,20 @@ InitKeyMgr(self)
    OUTPUT:
       RETVAL
 
+/********************************************************************
+   XmlSecKeyLoad()
+
+   Loads a key from a file into the keymanager. This mainly maps
+   to xmlsec's xmlSecCryptoAppDefaultKeysMngrAdoptKey()
+		 Args:
+		    self
+			mngr: the key manager attached to us
+			file: the external file name
+			pass: the password for key decryption
+			name: an optional name
+         Return value:
+		    whatever xmlSecCryptoAppDefaultKeysMngrAdoptKey
+*********************************************************************/
 IV
 XmlSecKeyLoad(self,mngr,file,pass,name,format)
       SV * self
@@ -226,20 +250,6 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
       xmlChar * name
       xmlSecKeyDataFormat format
    CODE:
-      /*******************************************
-         xmlSecKeyLoad()
-
-		 Loads a key from a file into the keymanager
-
-		 Args:
-		    self
-			mngr: the key manager attached to us
-			file: the external file name
-			pass: the password for key decryption
-			name: an optional name
-         Return value:
-		    whatever xmlSecCryptoAppDefaultKeysMngrAdoptKey
-	  ********************************************/
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
 	  xmlSecKeyPtr key;
       int ret=0;
@@ -248,18 +258,23 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
                 xmlSecCryptoAppGetDefaultPwdCallback(), (void*)file);
       if (key == NULL)
       {
-		  die ("xmlSecCryptoAppKeyLoad fail");
+		  croak ("xmlSecCryptoAppKeyLoad fail");
       }
       
 	  ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
 	  if (ret < 0) {
-		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
+		  croak ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
 	  }
 	  RETVAL=ret;
    OUTPUT:
       RETVAL
 
+/********************************************************************
+   xmlSecKeyLoadString()
+
+   This is the in-memory version of XmlSecKeyLoad()
+*********************************************************************/
 IV
 xmlSecKeyLoadString(self,mngr,data,pass,name,format)
       SV * self
@@ -291,6 +306,14 @@ xmlSecKeyLoadString(self,mngr,data,pass,name,format)
       RETVAL
 
 
+/********************************************************************
+   XmlSecVersion()
+
+   Returns the underlying xmlsec version. Please note that this is 
+   a static call based on a cpp macro. xmlsec doesn't provide a 
+   dynamic link to the version, only cleverly setup MACROS and a 
+   xmlSecCheckVersion function call
+*********************************************************************/
 char *
 XmlSecVersion(self)
       SV * self
@@ -299,14 +322,19 @@ XmlSecVersion(self)
    OUTPUT:
       RETVAL
 
+/********************************************************************
+   XmlSecSignDoc()
+
+   Entry point for signing process
+*********************************************************************/
 int
 XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
-   HV * self;
-   SV * doc;
-   IV mgr;
-   xmlChar * id_attr;
-   xmlChar * id_name;
-   xmlChar * id;
+   HV * self;        
+   SV * doc;         //The already setup libxml Document
+   IV mgr;           //The IV packed key manager ptr
+   xmlChar * id_attr;//The name of the attribute used as id
+   xmlChar * id_name;//The tagname of the targetted node
+   xmlChar * id;     //The id value of the targetted node
   CODE:
    int ret=0;
    xmlDocPtr real_doc;
@@ -390,14 +418,19 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
   OUTPUT:
    RETVAL
 
+/********************************************************************
+   KeyCertLoad()
+
+   Entry point for x509 certificate loading
+*********************************************************************/
 int
 KeyCertLoad(self,mgr,name,secret,file,format) 
-   SV * self;
-   IV mgr;
-   xmlChar * name;
-   xmlChar * secret;
-   xmlChar * file;
-   xmlSecKeyDataFormat format;
+   SV * self;    
+   IV mgr;          //The key manager ptr, IV packed
+   xmlChar * name;  //the keyname bound to the certificate
+   xmlChar * secret;//The password for decrypting the certificate
+   xmlChar * file;  //Certificate filename
+   xmlSecKeyDataFormat format; //The format of the certificate file
 CODE:
 
    int ret=0;
@@ -425,6 +458,12 @@ CODE:
   OUTPUT:
    RETVAL
 
+/********************************************************************
+   _KeysStoreSave()
+
+   Dumps the contents of the key manager for further use
+   This maps to xmlSecCryptoAppDefaultKeysMngrSave()
+*********************************************************************/
 int
 _KeysStoreSave (self, mgr,filename,type)
    SV * self;
@@ -436,3 +475,22 @@ CODE:
    RETVAL=xmlSecCryptoAppDefaultKeysMngrSave  (pkm,filename,type);
 OUTPUT:
    RETVAL
+
+/********************************************************************
+   _KeysStoreSave()
+
+   Dumps the contents of the key manager for further use
+   This maps to xmlSecCryptoAppDefaultKeysMngrLoad()
+*********************************************************************/
+int
+_KeysStoreLoad (self, mgr,filename)
+   SV * self;
+   IV mgr;
+   char * filename;
+CODE:
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   RETVAL=xmlSecCryptoAppDefaultKeysMngrLoad   (pkm,filename);
+OUTPUT:
+   RETVAL
+
+

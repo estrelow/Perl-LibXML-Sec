@@ -166,6 +166,15 @@ sub KeysStoreSave($$$) {
    return $self->_KeysStoreSave($self->{_keymgr},$file,$type);
 }
 
+sub KeysStoreLoad($$$) {
+
+   my $self=shift();
+   my $file=shift();
+
+   return $self->_KeysStoreLoad($self->{_keymgr},$file);
+}
+
+
 
 1;
 __END__
@@ -226,8 +235,10 @@ The argument is expected to be a well behaved L<LibXML::Document|https://metacpa
 =head2 KeysStoreSave('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
 
 This will dump the current contents of the previously loaded keys in the named file.
-The second argument is a bitmask indicating which keys will be dumped. The options, as stated
-in xmlsec documentation are as follows:
+The second argument is a bitmask indicating which keys will be dumped. The file can
+be used in the future with KeysStoreLoad
+B<Please beware that any private key will be dumped unencrypted>
+The options, as stated in xmlsec documentation are as follows:
 
 =over 1
 
@@ -250,6 +261,10 @@ in xmlsec documentation are as follows:
 =item B<xmlSecKeyDataTypeAny> Any key data.
 
 =back
+
+=head2 KeysStoreLoad('store.xml')
+
+This will restore a previously saved keys
 
 =head1 SEE ALSO
 
