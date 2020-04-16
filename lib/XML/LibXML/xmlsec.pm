@@ -143,16 +143,23 @@ sub signdoc() {
    my $id;
    my $id_attr='id';
    my $id_node;
+   my $start;
 
    $id=$options{'id'} if (exists $options{id});
    $id_attr=$options{'id-attr'} if (exists $options{'id-attr'});
    $id_node=$options{'id-node'} if (exists $options{'id-node'});
-
+   $start=$options{'node'} if (exists $options{'node'});
+   
    unless ($id_node) {
       $id_node=$doc->documentElement->nodeName;
    }
 
-   my $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id_attr,$id_node,$id);
+   my $r;
+   if ($start) {
+      $r=$self->XmlSecSign($doc,$self->{_keymgr},$start);
+   } else {
+      $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id_attr,$id_node,$id);
+   }
 
    return $doc;
 }

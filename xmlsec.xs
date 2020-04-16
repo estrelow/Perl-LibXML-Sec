@@ -153,11 +153,6 @@ xmlSecAppAddIDAttr(xmlNodePtr node, const xmlChar* attrName, const xmlChar* node
 
 MODULE = XML::LibXML::xmlsec		PACKAGE = XML::LibXML::xmlsec		
 
-TYPEMAP: <<HERE
-xmlSecKeyDataFormat   T_ENUM
-xmlChar *             T_PV
-HERE
-
 PROTOTYPES: ENABLE
 
 BOOT:
@@ -346,31 +341,26 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
    xmlNodePtr startNode;
 
    if (id_attr == NULL) {
-	   die( "id-attr must be specified");
+	   croak( "id-attr must be specified");
    }
 
    if (id == NULL) {
-	   die( "id must be specified");
+	   croak( "id must be specified");
    }
 
-   SV ** pm= hv_fetch(self,"_keymgr",7,0);
-   if (pm == NULL)
-   {
-      die ("Key Manager missing can't sign");
-   }
    xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
    
    xmlSecDSigCtx dsigCtx;
 
    ret=xmlSecDSigCtxInitialize(&dsigCtx, pkm);
    if (ret < 0)   {
-	   die("Error xmlSecDSigCtxInitialize fail");
+	   croak("Error xmlSecDSigCtxInitialize fail");
    }
 
 
    real_doc=(xmlDocPtr) PmmSvNode(doc);
    if (real_doc == NULL)  {
-	   die("Error: failed to get libxml doc");
+	   croak("Error: failed to get libxml doc");
    }
 
    /* set id atribute */
@@ -388,7 +378,7 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
 	while(cur != NULL) {
 		if(xmlSecAppAddIDAttr(cur, id_attr, nodeName, nsHref) < 0) {
 			xmlFree(buf);
-			die ("Error: xmlSecAppAddIDAttr failed");
+			croak ("Error: xmlSecAppAddIDAttr failed");
 		}
 		cur = xmlSecGetNextElementNode(cur->next);
 	}
@@ -397,25 +387,68 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
     /* find starting node by id */
     attr = xmlGetID(real_doc, id);
 	if (attr == NULL)	{
-		die("Error: xmlsec fail to find starting node");
+		croak("Error: xmlsec fail to find starting node");
 	}
 	
 	startNode = xmlSecFindNode(attr->parent, "Signature", "http://www.w3.org/2000/09/xmldsig#");
 	if (startNode == NULL)
 	{
-		die( "Error: xmlsec fail to find Signature node");
+		croak( "Error: xmlsec fail to find Signature node");
 	}
 	ret=xmlSecDSigCtxSign(&dsigCtx, startNode);
 	if (ret < 0)
 	{
-		die("Error xmlsec signature failed");
+		croak("Error xmlsec signature failed");
 	}
 
     xmlSecDSigCtxFinalize(&dsigCtx);
 
-	RETVAL=ret;
+   RETVAL=ret;
 
-  OUTPUT:
+   OUTPUT:
+   RETVAL
+
+int 
+XmlSecSign(self,doc,mgr,node)
+   HV * self;        
+   SV * doc;         //The already setup libxml Document
+   IV mgr;           //The IV packed key manager ptr
+   xmlNodePtr node;  //The signature starting node
+CODE:
+/********************************************************************
+   xmlSecSign()
+
+   Document signing with a given starting node
+*********************************************************************/
+
+   int ret=0;
+   xmlNodePtr startNode=node;
+   if (node == NULL)   {
+	   croak("Starting node missing");
+   }
+   xmlDocPtr real_doc=(xmlDocPtr) PmmSvNode(doc);
+   if (real_doc == NULL)  {
+	   croak("Error: failed to get libxml doc");
+   }
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+
+   xmlSecDSigCtx dsigCtx;
+
+   ret=xmlSecDSigCtxInitialize(&dsigCtx, pkm);
+   if (ret < 0)   {
+	   croak("Error xmlSecDSigCtxInitialize fail");
+   }
+   ret=xmlSecDSigCtxSign(&dsigCtx, startNode);
+   if (ret < 0)
+   {
+      croak("Error xmlsec signature failed");
+   }
+
+   xmlSecDSigCtxFinalize(&dsigCtx);
+
+   RETVAL=ret;
+
+   OUTPUT:
    RETVAL
 
 int
@@ -455,7 +488,7 @@ CODE:
    }
 
    RETVAL=ret;
-  OUTPUT:
+OUTPUT:
    RETVAL
 
 int
