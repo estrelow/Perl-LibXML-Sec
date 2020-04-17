@@ -6,9 +6,5 @@ use XML::LibXML::xmlsec;
 
 my $signer=XML::LibXML::xmlsec->new();
 
-$signer->loadpkey(PEM => 'key.pem', secret => 'the watcher and the tower');
-$signer->loadcert(PEM => 'esf.pem');
-
-my $doc=XML::LibXML->load_xml(location => 'hello-ready.xml');
-
+$signer->loadpkey(PFX => 'esf.pfx', secret => 'watcher');
 $signer->KeysStoreSave('keystore.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny);
