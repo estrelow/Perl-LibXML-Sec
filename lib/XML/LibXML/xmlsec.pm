@@ -153,12 +153,13 @@ sub signdoc() {
    unless ($id_node) {
       $id_node=$doc->documentElement->nodeName;
    }
+   $self->xmlSecIdAttrTweak($doc,$id_attr,$id_node);
 
    my $r;
    if ($start) {
       $r=$self->XmlSecSign($doc,$self->{_keymgr},$start);
    } else {
-      $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id_attr,$id_node,$id);
+      $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id);
    }
 
    return $doc;

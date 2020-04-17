@@ -93,6 +93,25 @@ xmlSecGetNextElementNode(xmlNodePtr cur) {
     return(cur);
 }
 
+/**************************************************************************************
+   xmlSecAppAddIDAttr()
+
+   Scans the xml document for id nodes
+
+   This is copied verbatim from xmlsec sample application. 
+   It's a utility function in order to scans for ID nodes and
+   then call libxml's xmlAddID() on each. This way,
+   the reference #something will work
+
+   Args:
+      node:     starting node for the scanning
+      attrName: name of the attribute that's supposed to hold
+                the id. Normally "id" or "ID"
+      nodeName: the scan only search for this node tags
+      nsHref:   namespace in case one is set
+   
+   Copyright (C) 2002-2016 Aleksey Sanin <aleksey@aleksey.com>. All Rights Reserved.
+***************************************************************************************/
 static int  
 xmlSecAppAddIDAttr(xmlNodePtr node, const xmlChar* attrName, const xmlChar* nodeName, const xmlChar* nsHref) {
     xmlAttrPtr attr, tmpAttr;
@@ -318,31 +337,72 @@ XmlSecVersion(self)
       RETVAL
 
 int
-XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
-   HV * self;        
-   SV * doc;         //The already setup libxml Document
-   IV mgr;           //The IV packed key manager ptr
-   xmlChar * id_attr;//The name of the attribute used as id
-   xmlChar * id_name;//The tagname of the targetted node
-   xmlChar * id;     //The id value of the targetted node
-  CODE:
-/********************************************************************
-   XmlSecSignDoc()
-
-   Entry point for signing process
-*********************************************************************/
-   int ret=0;
-   xmlDocPtr real_doc;
+xmlSecIdAttrTweak(self,doc,id_attr, id_name)
+   HV * self        
+   SV * doc
+   xmlChar * id_attr
+   xmlChar * id_name
+CODE:
    xmlChar* buf;
    xmlChar* nodeName;
    xmlChar* nsHref;
-   xmlAttrPtr attr;
    xmlNodePtr cur;
-   xmlNodePtr startNode;
+   xmlDocPtr real_doc;
 
    if (id_attr == NULL) {
 	   croak( "id-attr must be specified");
    }
+   real_doc=(xmlDocPtr) PmmSvNode(doc);
+   if (real_doc == NULL)  {
+	   croak("Error: failed to get libxml doc");
+   }
+
+   /* set id atribute */
+   buf = xmlStrdup(id_name);
+   nodeName = (xmlChar*)strrchr((char*)buf, ':');
+   if(nodeName != NULL) {
+	   (*(nodeName++)) = '\0';
+	   nsHref = buf;
+	} else {
+	   nodeName = buf;
+	   nsHref = NULL;
+	}
+   cur = xmlSecGetNextElementNode(real_doc->children);
+	while(cur != NULL) {
+		if(xmlSecAppAddIDAttr(cur, id_attr, nodeName, nsHref) < 0) {
+			xmlFree(buf);
+			croak ("Error: xmlSecAppAddIDAttr failed");
+		}
+		cur = xmlSecGetNextElementNode(cur->next);
+	}
+    xmlFree(buf);
+   RETVAL=0;
+
+   OUTPUT:
+   RETVAL
+
+
+int
+XmlSecSignDoc(self,doc,mgr, id)
+   HV * self        
+   SV * doc
+   IV mgr
+   xmlChar * id
+  CODE:
+/********************************************************************
+   XmlSecSignDoc()
+
+   Entry point for signing process with a given id
+
+   Args:
+      doc: the libxml doc to sign
+      mgr: the previously setup key mgr
+      id: the id value of the node subject to signature
+*********************************************************************/
+   int ret=0;
+   xmlDocPtr real_doc;
+   xmlAttrPtr attr;
+   xmlNodePtr startNode;
 
    if (id == NULL) {
 	   croak( "id must be specified");
@@ -363,26 +423,6 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
 	   croak("Error: failed to get libxml doc");
    }
 
-   /* set id atribute */
-   buf = xmlStrdup(id_name);
-   nodeName = (xmlChar*)strrchr((char*)buf, ':');
-   if(nodeName != NULL) {
-	   (*(nodeName++)) = '\0';
-	   nsHref = buf;
-	} else {
-	   nodeName = buf;
-	   nsHref = NULL;
-	}
-
-    cur = xmlSecGetNextElementNode(real_doc->children);
-	while(cur != NULL) {
-		if(xmlSecAppAddIDAttr(cur, id_attr, nodeName, nsHref) < 0) {
-			xmlFree(buf);
-			croak ("Error: xmlSecAppAddIDAttr failed");
-		}
-		cur = xmlSecGetNextElementNode(cur->next);
-	}
-    xmlFree(buf);
 
     /* find starting node by id */
     attr = xmlGetID(real_doc, id);
@@ -410,19 +450,24 @@ XmlSecSignDoc(self,doc,mgr, id_attr, id_name, id)
 
 int 
 XmlSecSign(self,doc,mgr,node)
-   HV * self;        
-   SV * doc;         //The already setup libxml Document
-   IV mgr;           //The IV packed key manager ptr
-   xmlNodePtr node;  //The signature starting node
+   HV * self        
+   SV * doc        
+   IV mgr          
+   SV * node 
 CODE:
 /********************************************************************
    xmlSecSign()
 
    Document signing with a given starting node
+
+   Args:
+      doc: the libxml doc to sign
+      mgr: the previously setup key mgr
+      node: the signature node
 *********************************************************************/
 
    int ret=0;
-   xmlNodePtr startNode=node;
+   xmlNodePtr startNode= PmmSvNodeExt(node,0);
    if (node == NULL)   {
 	   croak("Starting node missing");
    }
@@ -453,17 +498,23 @@ CODE:
 
 int
 KeyCertLoad(self,mgr,name,secret,file,format) 
-   SV * self;    
-   IV mgr;          //The key manager ptr, IV packed
-   xmlChar * name;  //the keyname bound to the certificate
-   xmlChar * secret;//The password for decrypting the certificate
-   xmlChar * file;  //Certificate filename
-   xmlSecKeyDataFormat format; //The format of the certificate file
+   SV * self    
+   IV mgr          
+   xmlChar * name  
+   xmlChar * secret
+   xmlChar * file 
+   xmlSecKeyDataFormat format 
 CODE:
 /********************************************************************
    KeyCertLoad()
 
    Entry point for x509 certificate loading
+
+   Args:
+      mgr:    The key manager ptr, IV packed
+      secret: The password for decrypting the certificate
+      file:   Certificate filename
+      format: The format of the certificate file
 *********************************************************************/
 
    int ret=0;
@@ -493,10 +544,10 @@ OUTPUT:
 
 int
 _KeysStoreSave (self, mgr,filename,type)
-   SV * self;
-   IV mgr;
-   char * filename;
-   int type;
+   SV * self
+   IV mgr
+   char * filename
+   int type
 CODE:
 /********************************************************************
    _KeysStoreSave()
