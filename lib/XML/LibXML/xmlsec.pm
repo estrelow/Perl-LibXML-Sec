@@ -235,10 +235,26 @@ in similar fashion as in loadpkey().
 
 =head2 signdoc
 
-   $signer->signdoc($xmldoc);
+   $signer->signdoc($xmldoc, %options);
 
 signdoc will compute the digital signature and then add it as contents to the XML document.
-The argument is expected to be a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
+The argument is expected to be a signature envelope as a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
+
+The options are as follows
+
+=over 1
+
+=item id => 'mydoc' indicates the id of the xml element subject of the signature
+
+=item start => <libxml node> indicates a starting Signature o dsig:Signature of the signing process
+
+=item id-attr => 'ID' indicates the name of the id attribute applied. Default lowercase 'id'
+
+=item id-node => 'mytagname' indicates the tag name of the xml element subject of the signature
+
+=back 
+
+id-attr and id-node are provided as tweaks in order to be able to sign a DTD-less documents in the same way the option --id-attr works in xmlsec1 utility
 
 =head2 KeysStoreSave('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
 
