@@ -101,7 +101,7 @@ xmlSecGetNextElementNode(xmlNodePtr cur) {
    This is copied verbatim from xmlsec sample application. 
    It's a utility function in order to scans for ID nodes and
    then call libxml's xmlAddID() on each. This way,
-   the reference #something will work
+   the reference #something will work on a DTD-less document
 
    Args:
       node:     starting node for the scanning
@@ -343,6 +343,15 @@ xmlSecIdAttrTweak(self,doc,id_attr, id_name)
    xmlChar * id_attr
    xmlChar * id_name
 CODE:
+/********************************************************************
+   xmlSecIdAttrTweak()
+
+   This is a wrapper for xmlSecAppAddIDAttr().
+   Args:
+      doc: a readely parsed LibXML document
+      id_attr: the name of the  attribute blessed as id. i.e.:id, ID, name, etc
+      id_name: the name of the tag blessed with ids
+*********************************************************************/
    xmlChar* buf;
    xmlChar* nodeName;
    xmlChar* nsHref;
@@ -524,7 +533,7 @@ CODE:
       key=xmlSecCryptoAppKeyLoad (file,format,secret,xmlSecCryptoAppGetDefaultPwdCallback(),file);
       //printf ("Loaded cert as new key\n");
 	  if (key == NULL) {
-		  die ("Can't load certificate file");
+		  croak ("Can't load certificate file");
 	  }
       ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
@@ -533,12 +542,33 @@ CODE:
       ret=xmlSecCryptoAppKeyCertLoad (key,file,xmlSecKeyDataFormatPem);
       //printf ("Loaded cert as attribute\n");
 	  if (ret<0) {
-		  die("Can't load certificate file");
+		  croak("Can't load certificate file");
 	  }
 
    }
 
    RETVAL=ret;
+OUTPUT:
+   RETVAL
+
+
+int
+_CACertLoad(self,mgr,filename,format,type)
+   SV * self
+   IV mgr
+   char * filename
+   xmlSecKeyDataFormat format
+   int type
+CODE:
+/********************************************************************
+   _CACertLoad()
+
+   This is a wrapper for xmlSecAppCryptoSimpleKeysMngrCertLoad()
+   This will load trusted root CA certificate or untrusted blacklisted
+   certificates in order to veriry signatures
+*********************************************************************/
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   RETVAL=xmlSecAppCryptoSimpleKeysMngrCertLoad(pkm,filename,format,type);
 OUTPUT:
    RETVAL
 
