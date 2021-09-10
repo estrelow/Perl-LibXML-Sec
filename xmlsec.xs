@@ -178,14 +178,21 @@ BOOT:
    // No libxml initialization here. XML::LibXML should handle that
    LIBXML_TEST_VERSION
 
-   int ret=xmlSecInit();
+   int ret=xmlSecOpenSSLAppInit (NULL);
+   if(ret < 0) {
+        croak("Error: xmlsec crypto OpenSSL app engine intialization failed");
+   }
+   ret=xmlSecInit();
    if(ret < 0) {
         croak("Error: xmlsec intialization failed");
    }
-   ret=xmlSecCryptoAppInit(NULL);
-   if(ret < 0) {
-        croak("Error: xmlsec crypto app engine intialization failed");
-   }
+
+       /* Init crypto library */
+    if(xmlSecCryptoAppInit(NULL) < 0) {
+        fprintf(stderr, "Error: crypto initialization failed.\n");
+        return(-1);
+    }
+
    ret=xmlSecCryptoInit();
    if(ret < 0) {
         croak("Error: xmlsec crypto engine intialization failed");
@@ -299,15 +306,16 @@ xmlSecKeyLoadString(self,mngr,data,pass,name,format)
    This is the in-memory version of XmlSecKeyLoad()
 *********************************************************************/
       xmlSecKeysMngrPtr pkm = INT2PTR(xmlSecKeysMngrPtr, mngr);
-	  xmlSecKeyPtr key;
+	   xmlSecKeyPtr key;
       xmlSecSize s = strlen(data);
-	  int ret;
+	   int ret;
 
-      key=xmlSecCryptoAppKeyLoadMemory (data,s,format,pass,xmlSecCryptoAppGetDefaultPwdCallback(), NULL);
+      printf ("len=%d pass=%s format=%d\n",s,pass,format);
+      key=xmlSecOpenSSLAppKeyLoadMemory (data,s,format,pass,NULL , NULL);
 
       if (key == NULL)
       {
-		  die ("xmlSecCryptoAppKeyLoad fail");
+		  die ("xmlSecOpenSSLAppKeyLoadMemory fail");
       }
       ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);

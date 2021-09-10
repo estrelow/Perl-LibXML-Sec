@@ -75,7 +75,9 @@ sub loadpkey() {
       $name= 'noname';
    }
 
-   if (exists $options{PEM}) {
+   if (exists $options{PEM} && $options{PEM} =~ /^-+BEGIN/) {
+      $ret= $self->xmlSecKeyLoadString($self->{_keymgr},$options{PEM},$secret,$name,xmlSecKeyDataFormatPem);
+   } elsif (exists $options{PEM}) {
       $file=$options{PEM};
       croak "Can't access PEM file $file" unless (-r $file);
       $ret= $self->XmlSecKeyLoad($self->{_keymgr},$file,$secret,$name,xmlSecKeyDataFormatPem);
@@ -129,9 +131,21 @@ sub loadcert() {
       $format=xmlSecKeyDataFormatCertDer;
    }
 
+   my $pfx;
+   # PKCS12, PFX, P12 are equivalent
+   $pfx= $options{PKCS12} if (exists $options{PKCS12});
+   $pfx= $options{PFX} if (exists $options{PFX});
+   $pfx= $options{P12} if (exists $options{P12});
+
    my $secret=0;
    $secret= $options{secret} if (exists $options{secret});
-   return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
+
+   if ($pfx) {
+      return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,xmlSecKeyDataFormatPkcs12);
+
+   } else {
+      return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
+   }
 }
 
 
