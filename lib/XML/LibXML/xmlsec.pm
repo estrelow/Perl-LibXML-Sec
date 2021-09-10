@@ -10,6 +10,7 @@ use AutoLoader;
 
 use XML::LibXML;
 use Scalar::Util qw(blessed);
+use MIME::Base64;
 
 use enum qw( xmlSecKeyDataFormatUnknown=0
     xmlSecKeyDataFormatBinary
@@ -56,6 +57,22 @@ sub new() {
 
    return $self;
 }
+
+sub _base64decode($$) {
+
+   my $self=shift();
+   my $data=shift();
+
+   my $s='';
+
+   for (split /\n/, $data) {
+      next if ( /^---/);
+      $s .= $_;
+   }
+
+   return decode_base64($s);
+}
+
 
 sub loadpkey() {
 
@@ -137,12 +154,16 @@ sub loadcert() {
    $pfx= $options{PFX} if (exists $options{PFX});
    $pfx= $options{P12} if (exists $options{P12});
 
+   if ($pfx) {
+      $file=$pfx;
+      $format=xmlSecKeyDataFormatPkcs12;
+   }
+
    my $secret=0;
    $secret= $options{secret} if (exists $options{secret});
 
-   if ($pfx) {
-      return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,xmlSecKeyDataFormatPkcs12);
-
+   if ($file =~ /^---/) {
+       return $self->KeyCertLoadString($self->{_keymgr},$name,$secret,$file,$format);
    } else {
       return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
    }

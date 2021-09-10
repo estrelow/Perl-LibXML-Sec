@@ -561,6 +561,54 @@ OUTPUT:
 
 
 int
+KeyCertLoadString(self,mgr,name,secret,data,format) 
+   SV * self    
+   IV mgr          
+   xmlChar * name  
+   xmlChar * secret
+   xmlChar * data 
+   xmlSecKeyDataFormat format 
+CODE:
+/********************************************************************
+   KeyCertLoadString()
+
+   Entry point for x509 certificate loading
+
+   Args:
+      mgr:    The key manager ptr, IV packed
+      secret: The password for decrypting the certificate
+      data:   Certificate data
+      format: The format of the certificate file
+*********************************************************************/
+
+   int ret=0;
+   int s=strlen(data);
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   xmlSecKeyPtr key=FindKey(pkm,name);
+   if (key==NULL)  { /* There's no key yet */
+      key=xmlSecOpenSSLAppKeyLoadMemory (data,s,format,secret,NULL , NULL);
+      //printf ("Loaded cert as new key\n");
+	  if (key == NULL) {
+		  croak ("Can't load certificate file");
+	  }
+      ret = xmlSecKeySetName(key,  name);
+	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+      
+   } else { /* we attach the certificate to the previously loaded key */
+      ret=xmlSecCryptoAppKeyCertLoadMemory  (key,data,s,format);
+      //printf ("Loaded cert as attribute\n");
+	  if (ret<0) {
+		  croak("Can't load certificate file");
+	  }
+
+   }
+
+   RETVAL=ret;
+OUTPUT:
+   RETVAL
+
+
+int
 _CACertLoad(self,mgr,filename,format,type)
    SV * self
    IV mgr
