@@ -134,6 +134,7 @@ sub loadcert() {
    return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
 }
 
+
 sub signdoc() {
 
    my $self=shift();
