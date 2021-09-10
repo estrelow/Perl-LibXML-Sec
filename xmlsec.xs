@@ -317,8 +317,8 @@ xmlSecKeyLoadString(self,mngr,data,pass,name,format)
       {
 		  die ("xmlSecOpenSSLAppKeyLoadMemory fail");
       }
-      ret = xmlSecKeySetName(key,  name);
 	  ret = xmlSecCryptoAppDefaultKeysMngrAdoptKey(pkm, key);
+     ret = xmlSecKeySetName(key,  name);
 	  if (ret < 0) {
 		  die ("xmlSecCryptoAppDefaultKeysMngrAdoptKey fail");
 	  }
