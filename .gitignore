@@ -1,0 +1,6 @@
+xmlsec.c 
+*.o 
+blib 
+xmlsec.bs 
+xmlsec.def 
+Makefile 
