@@ -163,8 +163,14 @@ sub loadcert() {
    $secret= $options{secret} if (exists $options{secret});
 
    if ($file =~ /^---/) {
-       return $self->KeyCertLoadString($self->{_keymgr},$name,$secret,$file,$format);
+      $self->{x509}=$file;
+      return $self->KeyCertLoadString($self->{_keymgr},$name,$secret,$file,$format);
    } else {
+
+      croak "Can't access certificate file $file" unless (-r $file);
+      open my $fh, '<',$file;
+      $self->{x509}=read $fh, my $file_content, -s $fh;
+      close $fh;
       return $self->KeyCertLoad($self->{_keymgr},$name,$secret,$file,$format);
    }
 }
@@ -195,7 +201,24 @@ sub signdoc() {
    if ($start) {
       $r=$self->XmlSecSign($doc,$self->{_keymgr},$start);
    } else {
+      $start=($doc->findnodes("//$id_node\[\@$id_attr='$id']"))[0];
       $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id);
+   }
+
+   return $doc unless ($self->{x509});
+
+   my $x509='';
+   for (split /\n/, $self->{x509}) {
+      next if ( /^---/);
+      $x509 .= "$_\n";
+   }
+
+   for ($start->parentNode->findnodes('ds:Signature/ds:KeyInfo/ds:X509Data')) {
+      
+      #Si aquí no hay nada, le inyecto el x509
+      if (! $_->hasChildNodes || $_->textContent =~ /^\s+$/ ) {
+         $_->appendTextChild('X509Certificate',$x509);
+      }      
    }
 
    return $doc;
