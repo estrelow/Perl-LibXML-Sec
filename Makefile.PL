@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
 my $libs;
 
 if ($^O eq 'MSWin32') {
-   $libs='-Lc:/perl64/site/lib/auto/MinGW/lib/ -lxmlsec1-openssl.dll -lxmlsec1.dll  -lxml2.dll';
+   $libs='-Lc:/perl64/site/lib/auto/MinGW/lib/ -lxmlsec-openssl.dll -lxmlsec.dll  -lxml2.dll';
 } else {
    $libs='-L/usr/local/lib -lxmlsec1-openssl -lxmlsec1 -lltdl  -lxml2    -lssl -lcrypto';
 }
