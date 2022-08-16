@@ -23,6 +23,11 @@ use enum qw( xmlSecKeyDataFormatUnknown=0
     xmlSecKeyDataFormatCertDer
 );
 
+use enum qw(xmlSecDSigStatusUnknown=0
+   xmlSecDSigStatusSucceeded
+   xmlSecDSigStatusInvalid
+   );
+
 #This constants will be used to filter dumped keys
 use constant xmlSecKeyDataTypeUnknown => 0x0000;
 use constant xmlSecKeyDataTypeNone => xmlSecKeyDataTypeUnknown;
@@ -222,6 +227,36 @@ sub signdoc() {
    }
 
    return $doc;
+}
+
+sub verifydoc($$%) {
+   my $self=shift();
+   my $doc=shift();
+   my %options=@_;
+
+   my $id;
+   my $id_attr='id';
+   my $id_node;
+   my $start;
+
+   $id=$options{'id'} if (exists $options{id});
+   $id_attr=$options{'id-attr'} if (exists $options{'id-attr'});
+   $id_node=$options{'id-node'} if (exists $options{'id-node'});
+   $start=$options{'node'} if (exists $options{'node'});
+
+   unless ($id_node) {
+      $id_node=$doc->documentElement->nodeName;
+   }
+   $self->xmlSecIdAttrTweak($doc,$id_attr,$id_node);
+
+   my $r;
+   $r=$self->XmlSecVerify($doc,$self->{_keymgr},$id);
+
+   if ($r == xmlSecDSigStatusSucceeded) {
+	   return 1;
+   } else {
+	   return 0;
+   }
 }
 
 sub KeysStoreSave($$$) {

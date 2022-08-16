@@ -513,6 +513,62 @@ CODE:
    OUTPUT:
    RETVAL
 
+int 
+XmlSecVerify(self,doc,mgr, id)
+   HV * self        
+   SV * doc
+   IV mgr
+   xmlChar * id
+CODE:
+   int ret=0;
+   xmlDocPtr real_doc;
+   xmlAttrPtr attr;
+   xmlNodePtr startNode;
+
+   if (id == NULL) {
+	   croak( "id must be specified");
+   }
+
+   xmlSecKeysMngrPtr pkm=INT2PTR(xmlSecKeysMngrPtr, mgr);
+   
+   xmlSecDSigCtx dsigCtx;
+
+   ret=xmlSecDSigCtxInitialize(&dsigCtx, pkm);
+   if (ret < 0)   {
+	   croak("Error xmlSecDSigCtxInitialize fail");
+   }
+
+   real_doc=(xmlDocPtr) PmmSvNode(doc);
+   if (real_doc == NULL)  {
+	   croak("Error: failed to get libxml doc");
+   }
+
+   attr = xmlGetID(real_doc, id);
+	if (attr == NULL)	{
+		croak("Error: xmlsec fail to find starting node");
+	}
+
+   startNode = xmlSecFindNode(attr->parent, "Signature", "http://www.w3.org/2000/09/xmldsig#");
+
+   if (startNode == NULL)
+   {
+    	croak( "Error: xmlsec fail to find Signature node");
+   }
+
+   ret=xmlSecDSigCtxVerify(&dsigCtx, startNode);
+
+   if (ret < 0)
+   {   croak("Error: xmlSecDSigCtxVerify fail");
+       RETVAL=ret;
+   } else {
+      ret=dsigCtx.status;
+   }
+
+   RETVAL=ret;
+OUTPUT:
+   RETVAL
+  
+
 int
 KeyCertLoad(self,mgr,name,secret,file,format) 
    SV * self    
