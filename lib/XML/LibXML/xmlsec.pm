@@ -350,6 +350,11 @@ The options are as follows
 
 id-attr and id-node are provided as tweaks in order to be able to sign a DTD-less documents in the same way the option --id-attr works in xmlsec1 utility
 
+=head2 $signer->verifydoc($xmldoc, %options);
+
+verifydoc will verify an already signed xmldoc. Options are alike the signdoc method.
+Will return 1 if verification is correct.
+
 =head2 KeysStoreSave('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
 
 This will dump the current contents of the previously loaded keys in the named file.

@@ -120,6 +120,7 @@ $signer->loadcert(PEM => $cert);
 if ($signer->verifydoc($doc, 'id-attr' => 'id', id=>'hello','id-node' =>'Data')) {
    print "Verify ok";
 } else {
-   print "NOT OK";
+   print "NOT OK\n";
+   print $signer->lastmsg;
 }
 

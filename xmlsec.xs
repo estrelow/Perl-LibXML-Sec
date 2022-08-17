@@ -2,6 +2,7 @@
 #include <xmlsec/xmldsig.h>
 #include <xmlsec/openssl/app.h>
 #include <xmlsec/xmltree.h>
+#include <xmlsec/errors.h>
 
 #include "perl-libxml-mm.h"
 
@@ -11,6 +12,10 @@
 
 #include "app.h"
 #include "crypto.h"
+
+#define XMLSEC_ERRORS_BUFFER_SIZE       1024
+
+char* sLastMsg=NULL;
 
 xmlSecKeyPtr FindKey(xmlSecKeysMngrPtr mngr, xmlChar* name) {
   
@@ -92,6 +97,37 @@ xmlSecGetNextElementNode(xmlNodePtr cur) {
     }
     return(cur);
 }
+
+void
+MyErrorsCallback (const char *file,
+                         int line,
+                         const char *func,
+                         const char *errorObject,
+                         const char *errorSubject,
+                         int reason,
+                         const char *msg) {
+
+   xmlSecSize i;
+   char* error_msg = NULL;
+
+   for(i = 0; (i < XMLSEC_ERRORS_MAX_NUMBER) && (xmlSecErrorsGetMsg(i) != NULL); ++i) {
+      if(xmlSecErrorsGetCode(i) == reason) {
+          error_msg = xmlSecErrorsGetMsg(i);
+          break;
+      }
+   }
+
+   switch(reason) {
+   case XMLSEC_ERRORS_R_INVALID_DATA:
+      if (sLastMsg) sprintf(sLastMsg,"%d:%s:%s",reason,error_msg,msg);
+       break;
+
+   default:
+      xmlSecErrorsDefaultCallback(file,line,func,errorObject,errorSubject,reason,msg);
+   }
+}
+
+
 
 /**************************************************************************************
    xmlSecAppAddIDAttr()
@@ -513,6 +549,7 @@ CODE:
    OUTPUT:
    RETVAL
 
+
 int 
 XmlSecVerify(self,doc,mgr, id)
    HV * self        
@@ -520,6 +557,16 @@ XmlSecVerify(self,doc,mgr, id)
    IV mgr
    xmlChar * id
 CODE:
+/********************************************************************
+   XmlSecVerify()
+
+   This is the main signature verifying function
+
+   Args:
+      doc: the already signed XML document handle
+      mgr: the previously setup key manager
+      id:  the id of the node we are to verify
+********************************************************************/
    int ret=0;
    xmlDocPtr real_doc;
    xmlAttrPtr attr;
@@ -555,19 +602,29 @@ CODE:
     	croak( "Error: xmlsec fail to find Signature node");
    }
 
-   ret=xmlSecDSigCtxVerify(&dsigCtx, startNode);
+   sLastMsg=(char*) malloc(XMLSEC_ERRORS_BUFFER_SIZE);
+   xmlSecErrorsSetCallback (&MyErrorsCallback); 
 
+   ret=xmlSecDSigCtxVerify(&dsigCtx, startNode);
+   xmlSecErrorsSetCallback(&xmlSecErrorsDefaultCallback);
    if (ret < 0)
    {   croak("Error: xmlSecDSigCtxVerify fail");
        RETVAL=ret;
    } else {
       ret=dsigCtx.status;
    }
-
+   
    RETVAL=ret;
 OUTPUT:
    RETVAL
   
+char *
+lastmsg(self)
+   SV * self
+CODE:
+   RETVAL=sLastMsg;
+OUTPUT:
+   RETVAL
 
 int
 KeyCertLoad(self,mgr,name,secret,file,format) 
