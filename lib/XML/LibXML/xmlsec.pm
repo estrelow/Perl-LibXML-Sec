@@ -44,8 +44,6 @@ our @ISA = qw(Exporter);
 
 our $VERSION = '0.01';
 
-
-
 require XSLoader;
 XSLoader::load('XML::LibXML::xmlsec', $VERSION);
 
@@ -259,7 +257,7 @@ sub verifydoc($$%) {
    }
 }
 
-sub KeysStoreSave($$$) {
+sub savekeys($$$) {
 
    my $self=shift();
    my $file=shift();
@@ -268,7 +266,7 @@ sub KeysStoreSave($$$) {
    return $self->_KeysStoreSave($self->{_keymgr},$file,$type);
 }
 
-sub KeysStoreLoad($$$) {
+sub loadkeys($$$) {
 
    my $self=shift();
    my $file=shift();
@@ -318,6 +316,7 @@ value, or it might be the key itself. A PEM=>val pair indicates PEM format, DER=
 and PFX=>val indicates PKCS12 format.
 An optional secret value will be used to decrypt the key. 
 An optional name argument will be used to mention the private key in further methods.
+Returns 0 on success. 
 
 =head2 loadcert
 
@@ -355,11 +354,17 @@ id-attr and id-node are provided as tweaks in order to be able to sign a DTD-les
 verifydoc will verify an already signed xmldoc. Options are alike the signdoc method.
 Will return 1 if verification is correct.
 
-=head2 KeysStoreSave('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
+=head2 lastmsg
+
+lastmsg will show the last error or warning message that might come out from
+the xmlsec engine. Particularly the verifydoc will set this message so there's a
+hint on the reason for a document to fail validation.
+
+=head2 savekeys('store.xml',XML::LibXML::xmlsec::xmlSecKeyDataTypeAny)
 
 This will dump the current contents of the previously loaded keys in the named file.
 The second argument is a bitmask indicating which keys will be dumped. The file can
-be used in the future with KeysStoreLoad
+be used in the future with loadkeys
 B<Please beware that any private key will be dumped unencrypted>
 The options, as stated in xmlsec documentation are as follows:
 
@@ -385,7 +390,7 @@ The options, as stated in xmlsec documentation are as follows:
 
 =back
 
-=head2 KeysStoreLoad('store.xml')
+=head2 loadkeys('store.xml')
 
 This will restore a previously saved keys
 
@@ -400,8 +405,6 @@ The original xmlsec library has a webpage at L<https://www.aleksey.com/xmlsec/>
 Erich Strelow, E<lt>hstrelo@puc.clE<gt>
 
 =head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2020 by A. U. Thor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.16.3 or,

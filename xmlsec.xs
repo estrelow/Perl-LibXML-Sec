@@ -15,7 +15,6 @@
 
 #define XMLSEC_ERRORS_BUFFER_SIZE       1024
 
-char* sLastMsg=NULL;
 
 xmlSecKeyPtr FindKey(xmlSecKeysMngrPtr mngr, xmlChar* name) {
   
@@ -98,6 +97,22 @@ xmlSecGetNextElementNode(xmlNodePtr cur) {
     return(cur);
 }
 
+#define MY_CXT_KEY "XML::LibXML::xmlsec::_guts" XS_VERSION
+
+typedef struct {
+   char sLastMsg[XMLSEC_ERRORS_BUFFER_SIZE];
+} my_cxt_t;
+
+START_MY_CXT
+
+/**************************************************************
+   myErrorsCallback()
+
+   xmlsec provides for an error callback function.
+   Since the xmlsig verification can fail for a number
+   of applicatio-related reasons, an error hook is supplied
+   in order for the lastmsg member to work
+**************************************************************/
 void
 MyErrorsCallback (const char *file,
                          int line,
@@ -109,6 +124,7 @@ MyErrorsCallback (const char *file,
 
    xmlSecSize i;
    char* error_msg = NULL;
+   dMY_CXT;
 
    for(i = 0; (i < XMLSEC_ERRORS_MAX_NUMBER) && (xmlSecErrorsGetMsg(i) != NULL); ++i) {
       if(xmlSecErrorsGetCode(i) == reason) {
@@ -119,7 +135,7 @@ MyErrorsCallback (const char *file,
 
    switch(reason) {
    case XMLSEC_ERRORS_R_INVALID_DATA:
-      if (sLastMsg) sprintf(sLastMsg,"%d:%s:%s",reason,error_msg,msg);
+      sprintf(MY_CXT.sLastMsg,"%d:%s:%s",reason,error_msg,msg);
        break;
 
    default:
@@ -211,6 +227,7 @@ MODULE = XML::LibXML::xmlsec		PACKAGE = XML::LibXML::xmlsec
 PROTOTYPES: ENABLE
 
 BOOT:
+{
    // No libxml initialization here. XML::LibXML should handle that
    LIBXML_TEST_VERSION
 
@@ -234,6 +251,9 @@ BOOT:
         croak("Error: xmlsec crypto engine intialization failed");
    }
 
+   MY_CXT_INIT;
+   MY_CXT.sLastMsg[0]=(char)0;
+}
 
 int
 InitPerlXmlSec(self)
@@ -346,7 +366,7 @@ xmlSecKeyLoadString(self,mngr,data,pass,name,format)
       xmlSecSize s = strlen(data);
 	   int ret;
 
-      printf ("len=%d pass=%s format=%d\n",s,pass,format);
+      //printf ("len=%d pass=%s format=%d\n",s,pass,format);
       key=xmlSecOpenSSLAppKeyLoadMemory (data,s,format,pass,NULL , NULL);
 
       if (key == NULL)
@@ -556,6 +576,8 @@ XmlSecVerify(self,doc,mgr, id)
    SV * doc
    IV mgr
    xmlChar * id
+PREINIT:
+   dMY_CXT;
 CODE:
 /********************************************************************
    XmlSecVerify()
@@ -602,7 +624,8 @@ CODE:
     	croak( "Error: xmlsec fail to find Signature node");
    }
 
-   sLastMsg=(char*) malloc(XMLSEC_ERRORS_BUFFER_SIZE);
+   //I reset the error msg
+   MY_CXT.sLastMsg[0]=(char)0;
    xmlSecErrorsSetCallback (&MyErrorsCallback); 
 
    ret=xmlSecDSigCtxVerify(&dsigCtx, startNode);
@@ -621,8 +644,10 @@ OUTPUT:
 char *
 lastmsg(self)
    SV * self
+PREINIT:
+   dMY_CXT;
 CODE:
-   RETVAL=sLastMsg;
+   RETVAL=MY_CXT.sLastMsg;
 OUTPUT:
    RETVAL
 
