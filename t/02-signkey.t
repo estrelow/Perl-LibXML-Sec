@@ -8,7 +8,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 3;
+use Test::More tests => 7;
 
 use XML::LibXML;
 use XML::LibXML::xmlsec;
@@ -72,6 +72,32 @@ my $xml= <<"EOX";
 </Envelope>
 EOX
 
+sub checkvalue($$$) {
+
+   my $doc=shift();
+   my $path=shift();
+   my $match=shift();
+
+   my $value=$doc->findvalue($path);
+
+   return (decode_base64($value) eq decode_base64($match) );
+}
+
+my $cheat_hash= "LAM89OAB9lpCbjy8hYFXPmYenAM=";
+my $cheat_value= <<"base64";
+qcw3qhRQE1YSMMpXMMU/lPAl/2WU4gvUAVbsU/ZUBMakUrVWp0AJ16Z+D1YcH75j
+GRuqCjeOdK87TmEq0gG/YrQZnHBuNRWHyMeadxe7ViB0GAoHGcHte5B2Su6m2MKz
+XSGsF9EeRjzL3dYY6/jNouapXdCDUCw8fivyOkUGFrs=
+base64
+
+my $cheat_modulus= <<"base64";
+wdbXJV/qv23A0bgf1M7u64xAjaMu6sRD0pvtZQF5xvY0bxo4uRC8+xhfb1/pFpHN
+rPvAJ3Asbx4iU3pJKI+PGCGIcfYCw1A5HFmwBcmHK3sJjdyI+LqbS2nBkjhkkW6w
+xcqitTOOATIsXCLvZjWvomUjjMH23nRvLcE6mFvRK5E=
+base64
+
+my $cheat_exponent="AQAB";
+
 my $signer=XML::LibXML::xmlsec->new();
 
 ok($signer->loadpkey(PEM => $private)==0,"Private key loading");
@@ -79,8 +105,11 @@ ok($signer->loadpkey(PEM => $public)==0,"Public key loading");
 
 my $doc=XML::LibXML->load_xml(string => $xml);
 
-print $doc->toString;
-exit 0;
 
 ok($signer->signdoc($doc, id => "hello", 'id-node' => 'Data', 'id-attr' => 'ID'),"Signature");
+
+ok(checkvalue($doc,'//ds:DigestValue',$cheat_hash),'Digest');
+ok(checkvalue($doc,'//ds:Signature/ds:SignatureValue',$cheat_value),'Signature value');
+ok(checkvalue($doc,'//ds:RSAKeyValue/ds:Modulus',$cheat_modulus),'Modulus value');
+ok(checkvalue($doc,'//ds:RSAKeyValue/ds:Exponent',$cheat_exponent),'Exponent value');
 
