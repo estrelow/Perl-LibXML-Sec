@@ -2,6 +2,7 @@ TYPEMAP
 xmlSecKeyDataFormat   T_ENUM
 xmlChar *             T_PV
 xmlNodePtr            O_NODE_OBJECT
+xmlSecTransformId     T_PTR
 
 INPUT
 

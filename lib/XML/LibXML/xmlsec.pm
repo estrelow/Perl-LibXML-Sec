@@ -274,7 +274,34 @@ sub loadkeys($$$) {
    return $self->_KeysStoreLoad($self->{_keymgr},$file);
 }
 
+sub template($$$$) {
 
+   my $self=shift();
+   my $doc=shift();
+   my $class=shift();
+   my $id=shift();
+
+   my $tid;
+
+   my @AllowedClass=('xmlSecTransformRsaSha1Id','xmlSecTransformRsaSha224Id','xmlSecTransformRsaSha256Id');
+
+   if ($class && length($class) <= 20 && ! $class =~ /^xmlSecTransform\w{1,20}Id$/ ) {
+	   $tid="xmlSecTransform".$class."Id";
+   } elsif ($class && $class =~ /^xmlSecTransform\w{1,20}Id$/) {
+	   $tid=$class;
+   } else {
+	   croak "Missformed $class transformation class";
+   }
+
+   if(! $tid ~~ @AllowedClass) {
+	   croak "Unknown envelope transformation class $class";
+   }
+   $tid = "Perl$tid";
+   $self->XMLCreateTemplate($doc,$self->$tid,$self->PerlxmlSecTransformSha1Id(),"#$id");
+
+   return $doc;
+   
+}
 
 1;
 __END__

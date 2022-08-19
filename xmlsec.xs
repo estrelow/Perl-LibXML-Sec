@@ -10,7 +10,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include "app.h"
+#include <xmlsec/app.h>
 #include "crypto.h"
 
 #define XMLSEC_ERRORS_BUFFER_SIZE       1024
@@ -801,4 +801,81 @@ CODE:
 OUTPUT:
    RETVAL
 
+xmlSecTransformId
+PerlxmlSecTransformRsaSha224Id(self)
+   HV * self;
+CODE:
+   /*******************************************************************
+   PerlxmlSecTransformRsaSha224Id(),PerlxmlSecTransformRsaSha256Id(),
+   PerlxmlSecTransformRsaSha1Id() are helper functions for xmlsec
+   template profile classes, much the same in the way app.c is built
+   ********************************************************************/
+   RETVAL=xmlSecTransformRsaSha224Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRsaSha256Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaSha256Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId 
+PerlxmlSecTransformRsaSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaSha1Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformSha1Id;
+OUTPUT:
+   RETVAL
+
+int XMLCreateTemplate(self,doc,opt,dig,id)
+   HV * self;
+   SV * doc;
+   xmlSecTransformId opt;
+   xmlSecTransformId dig;
+   xmlChar * id;
+CODE:
+   xmlDocPtr real_doc;
+   xmlNodePtr signNode = NULL;
+   xmlNodePtr refNode = NULL;
+   xmlNodePtr keyInfoNode = NULL;
+
+   real_doc=(xmlDocPtr) PmmSvNode(doc);
+   if (real_doc == NULL)  {
+	   croak("Error: failed to get libxml doc");
+   }
+   signNode = xmlSecTmplSignatureCreate(real_doc, xmlSecTransformExclC14NId,opt, NULL);
+   if(signNode == NULL) {
+      croak(stderr, "Error: failed to create signature template");
+   }
+   xmlAddChild(xmlDocGetRootElement(real_doc), signNode);
+   refNode = xmlSecTmplSignatureAddReference(signNode, dig,NULL, id, NULL);
+   if(refNode == NULL) {
+        croak("Error: failed to add reference to signature template");
+   }
+   if(xmlSecTmplReferenceAddTransform(refNode, xmlSecTransformEnvelopedId) == NULL) {
+        croak("Error: failed to add enveloped transform to reference");
+   }
+   keyInfoNode = xmlSecTmplSignatureEnsureKeyInfo(signNode, NULL);
+   if(keyInfoNode == NULL) {
+      croak("Error: failed to add key info");
+   }
+
+   if(xmlSecTmplKeyInfoAddKeyName(keyInfoNode, NULL) == NULL) {
+      croak(stderr, "Error: failed to add key name\n");
+    }
+
+   RETVAL=0;
+OUTPUT:
+   RETVAL
 
