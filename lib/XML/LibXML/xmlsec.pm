@@ -274,34 +274,79 @@ sub loadkeys($$$) {
    return $self->_KeysStoreLoad($self->{_keymgr},$file);
 }
 
-sub template($$$$) {
+sub AllowedClass($$) {
+
+   my $self=shift();
+   my $id=shift();
+
+   my @AllowedClass=qw(
+xmlSecTransformDsaSha1Id
+xmlSecTransformDsaSha256Id
+xmlSecTransformEcdsaSha1Id
+xmlSecTransformEcdsaSha224Id
+xmlSecTransformEcdsaSha256Id
+xmlSecTransformEcdsaSha384Id
+xmlSecTransformEcdsaSha512Id
+xmlSecTransformHmacMd5Id
+xmlSecTransformHmacRipemd160Id
+xmlSecTransformHmacSha1Id
+xmlSecTransformHmacSha224Id
+xmlSecTransformHmacSha256Id
+xmlSecTransformHmacSha384Id
+xmlSecTransformHmacSha512Id
+xmlSecTransformMd5Id
+xmlSecTransformRipemd160Id
+xmlSecTransformRsaMd5Id
+xmlSecTransformRsaRipemd160Id
+xmlSecTransformRsaSha1Id
+xmlSecTransformRsaSha224Id
+xmlSecTransformRsaSha256Id
+xmlSecTransformRsaSha384Id
+xmlSecTransformRsaSha512Id
+xmlSecTransformSha1Id
+xmlSecTransformSha224Id
+xmlSecTransformSha256Id
+xmlSecTransformSha384Id
+xmlSecTransformSha512Id
+);
+
+   return ($id ~~ @AllowedClass);
+
+}
+
+sub template4sign($$$$) {
 
    my $self=shift();
    my $doc=shift();
-   my $class=shift();
+   my $algorithm=shift();
    my $id=shift();
 
-   my $tid;
+   my $transform; #Transformation algorithm class
+   my $digest;    #Digest algorithm class
 
-   my @AllowedClass=('xmlSecTransformRsaSha1Id','xmlSecTransformRsaSha224Id','xmlSecTransformRsaSha256Id');
-
-   if ($class && length($class) <= 20 && ! $class =~ /^xmlSecTransform\w{1,20}Id$/ ) {
-	   $tid="xmlSecTransform".$class."Id";
-   } elsif ($class && $class =~ /^xmlSecTransform\w{1,20}Id$/) {
-	   $tid=$class;
-   } else {
-	   croak "Missformed $class transformation class";
+   unless ($algorithm =~ /(\w{1,20})-(\w{1,20})/) {
+      croak "Missformed algorithm $algorithm";
    }
 
-   if(! $tid ~~ @AllowedClass) {
-	   croak "Unknown envelope transformation class $class";
+   $transform='xmlSecTransform'.ucfirst(lc($1)).ucfirst(lc($2)).'Id';
+   $digest='xmlSecTransform'.ucfirst(lc($2)).'Id';
+
+   unless ($self->AllowedClass($transform)) {
+      croak "Unknown transformation algorithm $1";
    }
-   $tid = "Perl$tid";
-   $self->XMLCreateTemplate($doc,$self->$tid,$self->PerlxmlSecTransformSha1Id(),"#$id");
+
+   unless ($self->AllowedClass($digest)) {
+	   croak "Unknown digest algorighm $2";
+   }
+
+   $transform = "Perl$transform";
+   $digest="Perl$digest";
+   $self->XMLCreateSignTemplate($doc,$self->$transform,$self->$digest,"#$id");
 
    return $doc;
    
 }
+
 
 1;
 __END__
@@ -316,6 +361,7 @@ XML::LibXML::xmlsec - XML signing/encription using xmlsec library
   
   my $signer=XML::LibxXML::xmlsec->new();
   $signer->loadpkey(PEM => 'jdoe.pem', secret => 'hush');
+  $signer->template4sign($xmldoc,'rsa-sha1','MyDocument');
   $signer->signdoc($xmldoc);
 
 =head1 DESCRIPTION
@@ -326,9 +372,9 @@ es described in W3C standards.
 
 =head2 INSTALLATION
 
-You must have a running xmlsec library. There are binaries been ported to many Linux distributions, as
+You must have a running xmlsec library, which in turns has several dependencies. 
+There are xmlsec binaries built into many Linux distributions, as
 well as binaries for Windows available.
-
 
 =head1 METHODS
 
@@ -339,7 +385,7 @@ well as binaries for Windows available.
    $signer->loadpkey(PEM => $string_with_pem);
 
 loadpkey will set the private key needed for digital signature. The key may be passed as a filename
-value, or it might be the key itself. A PEM=>val pair indicates PEM format, DER=>val indicates DER format
+value, or it might be the key itself as a string. A PEM=>val pair indicates PEM format, DER=>val indicates DER format
 and PFX=>val indicates PKCS12 format.
 An optional secret value will be used to decrypt the key. 
 An optional name argument will be used to mention the private key in further methods.
@@ -353,12 +399,23 @@ Returns 0 on success.
 loadcert will set the X509 certificate needed for verifying or digital signature. The value may be passed
 in similar fashion as in loadpkey().
 
+=head2 template4sign($doc,'rsa-sha256',$id)
+
+Adds a signature template branch to the LibXML $doc for the signature
+of the $id element. The second argument is a case insensitive string that identifies the algorithm combination
+I<keying-digest> in order to setup the template. The algorithm must be one supported by
+the xmlsec library and corresponds to the SignatureMethod definition.
+Some of the known supported algorithms: RSA-SHA1, RSA-SHA224, RSA-SHA256,
+RSA-SHA384, RSA-SHA512, DSA-SHA256, ECDSA-SHA25.
+Returns the modified xml document
+
 =head2 signdoc
 
    $signer->signdoc($xmldoc, %options);
 
 signdoc will compute the digital signature and then add it as contents to the XML document.
 The argument is expected to be a signature envelope as a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
+already setup with the algorithm identifiers and the signature placeholder.
 
 The options are as follows
 
@@ -420,6 +477,30 @@ The options, as stated in xmlsec documentation are as follows:
 =head2 loadkeys('store.xml')
 
 This will restore a previously saved keys
+
+=head1 LIMITATIONS AND TODO LIST
+
+This module exposes only a subset of the xmlsec library features.
+As it is
+
+=over 4
+
+=item *
+
+Only signature and verification is available. Document encryption is on the TODO list
+
+=item *
+
+xmlsec can use several crypto engines. This perl module uses only the default
+compiled-in crypto engine. Anyway, this is the reason why this module doesn't
+interact with any Crypt or OpenSSL perl module.
+
+=item *
+
+xmlsec has a strong libxml2 binding. This module will accept XML::LibXML handles, but in turn
+will do processing in the underlying xmlsec/libxml2 C libraries.
+
+=back
 
 =head1 SEE ALSO
 

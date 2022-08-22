@@ -806,11 +806,166 @@ PerlxmlSecTransformRsaSha224Id(self)
    HV * self;
 CODE:
    /*******************************************************************
-   PerlxmlSecTransformRsaSha224Id(),PerlxmlSecTransformRsaSha256Id(),
-   PerlxmlSecTransformRsaSha1Id() are helper functions for xmlsec
-   template profile classes, much the same in the way app.c is built
+   PerlxmlSecTransformRsaSha224Id(),
+   PerlxmlSecTransformRsaSha256Id(),
+   PerlxmlSecTransformRsaSha1Id() et all...
+
+   are helper functions for xmlsec transformation profile classes.
+   This way we can use the handy app.h macros
    ********************************************************************/
    RETVAL=xmlSecTransformRsaSha224Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformDsaSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformDsaSha1Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformDsaSha256Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformDsaSha256Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformEcdsaSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformEcdsaSha1Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformEcdsaSha224Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformEcdsaSha224Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformEcdsaSha256Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformEcdsaSha256Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformEcdsaSha384Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformEcdsaSha384Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformEcdsaSha512Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformEcdsaSha512Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacMd5Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacMd5Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacRipemd160Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacRipemd160Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacSha1Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacSha224Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacSha224Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacSha256Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacSha256Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacSha384Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacSha384Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformHmacSha512Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformHmacSha512Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformMd5Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformMd5Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRipemd160Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRipemd160Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRsaMd5Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaMd5Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRsaRipemd160Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaRipemd160Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRsaSha1Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaSha1Id;
 OUTPUT:
    RETVAL
 
@@ -822,11 +977,19 @@ CODE:
 OUTPUT:
    RETVAL
 
-xmlSecTransformId 
-PerlxmlSecTransformRsaSha1Id(self)
+xmlSecTransformId
+PerlxmlSecTransformRsaSha384Id(self)
    HV * self;
 CODE:
-   RETVAL=xmlSecTransformRsaSha1Id;
+   RETVAL=xmlSecTransformRsaSha384Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformRsaSha512Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformRsaSha512Id;
 OUTPUT:
    RETVAL
 
@@ -838,13 +1001,59 @@ CODE:
 OUTPUT:
    RETVAL
 
-int XMLCreateTemplate(self,doc,opt,dig,id)
+xmlSecTransformId
+PerlxmlSecTransformSha224Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformSha224Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformSha256Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformSha256Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformSha384Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformSha384Id;
+OUTPUT:
+   RETVAL
+
+xmlSecTransformId
+PerlxmlSecTransformSha512Id(self)
+   HV * self;
+CODE:
+   RETVAL=xmlSecTransformSha512Id;
+OUTPUT:
+   RETVAL
+
+
+
+int XMLCreateSignTemplate(self,doc,opt,dig,id)
    HV * self;
    SV * doc;
    xmlSecTransformId opt;
    xmlSecTransformId dig;
    xmlChar * id;
 CODE:
+/***************************************
+   XMLCreateSignTemplate()
+
+   This is the main template signature
+   generation call
+
+   Args:
+     doc: the already parsed LibXML for adding the Signature artifacts
+     opt: a tranform klass id for the main Signature attribute
+     opt: a transform class for the Digest atribute
+     id: the node id to be signed
+****************************************/
    xmlDocPtr real_doc;
    xmlNodePtr signNode = NULL;
    xmlNodePtr refNode = NULL;
