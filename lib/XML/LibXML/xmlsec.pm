@@ -360,15 +360,19 @@ XML::LibXML::xmlsec - XML signing/encription using xmlsec library
 
   use XML::LibXML::xmlsec;
   
-  my $signer=XML::LibxXML::xmlsec->new();
+  my $signer=XML::LibXML::xmlsec->new();
   $signer->loadpkey(PEM => 'jdoe.pem', secret => 'hush');
   $signer->template4sign($xmldoc,'rsa-sha1','MyDocument');
   $signer->signdoc($xmldoc);
 
+  unless( $signer->verify($received_xml)) {
+     die "This document was tampered";
+  }
+
 =head1 DESCRIPTION
 
 XML::LibXML::xmlsec is a bind module for xmlsec, a C library aimed for XML digital signature and encryption
-es described in W3C standards.
+as described in W3C standards.
 
 
 =head2 INSTALLATION
