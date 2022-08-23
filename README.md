@@ -1,4 +1,4 @@
-# Perl-LibXML-Sec
+# Perl-LibXML-xmlsec
 Perl bindings for xmlsec
 
 This modules provides glue for the XMLSec Library, as seen on https://www.aleksey.com/xmlsec/

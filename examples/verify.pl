@@ -112,7 +112,7 @@ jJrieKKWdl/wjQJNaV1eLsJ4NyOcyz8AC1ZflGbKfi48fFTGoP60zw==
 -----END CERTIFICATE-----
 PEM
 
-my $doc=XML::LibXML->load_xml(string => $tampered);
+my $doc=XML::LibXML->load_xml(string => $signeddoc);
 my $signer=XML::LibXML::xmlsec->new();
 
 $signer->loadcert(PEM => $cert);
