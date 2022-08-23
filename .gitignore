@@ -1,6 +1,9 @@
-xmlsec.c 
-*.o 
-blib 
-xmlsec.bs 
-xmlsec.def 
-Makefile 
+xmlsec.c
+*.o
+blib
+xmlsec.bs
+xmlsec.def
+Makefile
+*.tar.gz
+*.tmp
+MYMETA.*
