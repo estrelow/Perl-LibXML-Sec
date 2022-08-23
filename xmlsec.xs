@@ -3,6 +3,7 @@
 #include <xmlsec/openssl/app.h>
 #include <xmlsec/xmltree.h>
 #include <xmlsec/errors.h>
+#include <xmlsec/templates.h>
 
 #include "perl-libxml-mm.h"
 
@@ -242,8 +243,7 @@ BOOT:
 
        /* Init crypto library */
     if(xmlSecCryptoAppInit(NULL) < 0) {
-        fprintf(stderr, "Error: crypto initialization failed.\n");
-        return(-1);
+        croak( "Error: crypto initialization failed.\n");
     }
 
    ret=xmlSecCryptoInit();
@@ -1065,7 +1065,7 @@ CODE:
    }
    signNode = xmlSecTmplSignatureCreate(real_doc, xmlSecTransformExclC14NId,opt, NULL);
    if(signNode == NULL) {
-      croak(stderr, "Error: failed to create signature template");
+      croak( "Error: failed to create signature template");
    }
    xmlAddChild(xmlDocGetRootElement(real_doc), signNode);
    refNode = xmlSecTmplSignatureAddReference(signNode, dig,NULL, id, NULL);
@@ -1081,7 +1081,7 @@ CODE:
    }
 
    if(xmlSecTmplKeyInfoAddKeyName(keyInfoNode, NULL) == NULL) {
-      croak(stderr, "Error: failed to add key name\n");
+      croak( "Error: failed to add key name\n");
     }
 
    RETVAL=0;

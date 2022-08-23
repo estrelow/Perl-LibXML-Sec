@@ -11,6 +11,7 @@ use AutoLoader;
 use XML::LibXML;
 use Scalar::Util qw(blessed);
 use MIME::Base64;
+use List::Util qw( first );
 
 use enum qw( xmlSecKeyDataFormatUnknown=0
     xmlSecKeyDataFormatBinary
@@ -310,7 +311,7 @@ xmlSecTransformSha384Id
 xmlSecTransformSha512Id
 );
 
-   return ($id ~~ @AllowedClass);
+   return (first {$id eq $_ } @AllowedClass);
 
 }
 
