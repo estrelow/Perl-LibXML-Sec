@@ -700,7 +700,7 @@ OUTPUT:
 
 int
 KeyCertLoadString(self,mgr,name,secret,data,format) 
-   SV * self    
+__attribute((unused)) HV * self;
    IV mgr          
    xmlChar * name  
    xmlChar * secret
