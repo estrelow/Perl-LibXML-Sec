@@ -386,7 +386,7 @@ __attribute((unused)) HV * self;
 
 char *
 XmlSecVersion(self)
-      SV * self
+__attribute((unused)) HV * self;
    CODE:
 /********************************************************************
    XmlSecVersion()
@@ -402,7 +402,7 @@ XmlSecVersion(self)
 
 int
 xmlSecIdAttrTweak(self,doc,id_attr, id_name)
-   HV * self        
+__attribute((unused)) HV * self;
    SV * doc
    xmlChar * id_attr
    xmlChar * id_name
@@ -457,7 +457,7 @@ CODE:
 
 int
 XmlSecSignDoc(self,doc,mgr, id)
-   HV * self        
+__attribute((unused)) HV * self;
    SV * doc
    IV mgr
    xmlChar * id
@@ -523,7 +523,7 @@ XmlSecSignDoc(self,doc,mgr, id)
 
 int 
 XmlSecSign(self,doc,mgr,node)
-   HV * self        
+__attribute((unused)) HV * self;
    SV * doc        
    IV mgr          
    SV * node 
