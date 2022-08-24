@@ -349,7 +349,7 @@ XmlSecKeyLoad(self,mngr,file,pass,name,format)
 
 IV
 xmlSecKeyLoadString(self,mngr,data,pass,name,format)
-      SV * self
+__attribute((unused)) HV * self;
       IV mngr
       xmlChar * data
       xmlChar * pass
