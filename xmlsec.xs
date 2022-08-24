@@ -825,6 +825,12 @@ CODE:
 OUTPUT:
    RETVAL
 
+#ifdef xmlSecTransformEcdsaSha1Id
+
+# A group of algorithms were added to xmlsec in version 1.2.19
+# DSA-SHA256, ECDSA-SHA1, ECDSA-SHA224, ECDSA-SHA256, ECDSA-SHA384, ECDSA-SHA512
+# 
+
 xmlSecTransformId
 PerlxmlSecTransformDsaSha256Id(self)
    HV * self;
@@ -832,6 +838,7 @@ CODE:
    RETVAL=xmlSecTransformDsaSha256Id;
 OUTPUT:
    RETVAL
+
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha1Id(self)
@@ -872,6 +879,8 @@ CODE:
    RETVAL=xmlSecTransformEcdsaSha512Id;
 OUTPUT:
    RETVAL
+
+#endif
 
 xmlSecTransformId
 PerlxmlSecTransformHmacMd5Id(self)
