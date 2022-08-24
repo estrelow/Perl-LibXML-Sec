@@ -803,7 +803,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaSha224Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    /*******************************************************************
    PerlxmlSecTransformRsaSha224Id(),
@@ -819,7 +819,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformDsaSha1Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformDsaSha1Id;
 OUTPUT:
