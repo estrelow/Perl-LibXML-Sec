@@ -748,7 +748,7 @@ OUTPUT:
 
 int
 _CACertLoad(self,mgr,filename,format,type)
-   SV * self
+__attribute((unused)) HV * self;
    IV mgr
    char * filename
    xmlSecKeyDataFormat format
@@ -768,7 +768,7 @@ OUTPUT:
 
 int
 _KeysStoreSave (self, mgr,filename,type)
-   SV * self
+__attribute((unused)) HV * self;
    IV mgr
    char * filename
    int type
@@ -786,7 +786,7 @@ OUTPUT:
 
 int
 _KeysStoreLoad (self, mgr,filename)
-   SV * self;
+__attribute((unused)) HV * self;
    IV mgr;
    char * filename;
 CODE:
@@ -1045,7 +1045,7 @@ OUTPUT:
 
 
 int XMLCreateSignTemplate(self,doc,opt,dig,id)
-   HV * self;
+__attribute((unused)) HV * self;
    SV * doc;
    xmlSecTransformId opt;
    xmlSecTransformId dig;
