@@ -1,9 +1,9 @@
 TYPEMAP
-xmlSecKeyDataFormat   T_ENUM
-xmlChar *             T_PV
-xmlNodePtr            O_NODE_OBJECT
-xmlSecTransformId     T_PTR
-
+xmlSecKeyDataFormat        T_ENUM
+xmlChar *                  T_PV
+xmlNodePtr                 O_NODE_OBJECT
+xmlSecTransformId          T_PTR
+__attribute((unused)) HV * T_HVREF
 INPUT
 
 O_NODE_OBJECT
