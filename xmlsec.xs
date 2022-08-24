@@ -833,7 +833,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformDsaSha256Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformDsaSha256Id;
 OUTPUT:
@@ -842,7 +842,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha1Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformEcdsaSha1Id;
 OUTPUT:
@@ -850,7 +850,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha224Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformEcdsaSha224Id;
 OUTPUT:
@@ -858,7 +858,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha256Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformEcdsaSha256Id;
 OUTPUT:
@@ -866,7 +866,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha384Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformEcdsaSha384Id;
 OUTPUT:
@@ -874,7 +874,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformEcdsaSha512Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformEcdsaSha512Id;
 OUTPUT:
@@ -884,7 +884,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacMd5Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacMd5Id;
 OUTPUT:
@@ -892,7 +892,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacRipemd160Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacRipemd160Id;
 OUTPUT:
@@ -900,7 +900,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacSha1Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacSha1Id;
 OUTPUT:
@@ -908,7 +908,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacSha224Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacSha224Id;
 OUTPUT:
@@ -916,7 +916,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacSha256Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacSha256Id;
 OUTPUT:
@@ -924,7 +924,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacSha384Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacSha384Id;
 OUTPUT:
@@ -932,7 +932,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformHmacSha512Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformHmacSha512Id;
 OUTPUT:
@@ -940,7 +940,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformMd5Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformMd5Id;
 OUTPUT:
@@ -948,7 +948,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRipemd160Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRipemd160Id;
 OUTPUT:
@@ -956,7 +956,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaMd5Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaMd5Id;
 OUTPUT:
@@ -964,7 +964,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaRipemd160Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaRipemd160Id;
 OUTPUT:
@@ -972,7 +972,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaSha1Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaSha1Id;
 OUTPUT:
@@ -980,7 +980,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaSha256Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaSha256Id;
 OUTPUT:
@@ -988,7 +988,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaSha384Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaSha384Id;
 OUTPUT:
@@ -996,7 +996,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformRsaSha512Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformRsaSha512Id;
 OUTPUT:
@@ -1004,7 +1004,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformSha1Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformSha1Id;
 OUTPUT:
@@ -1012,7 +1012,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformSha224Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformSha224Id;
 OUTPUT:
@@ -1020,7 +1020,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformSha256Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformSha256Id;
 OUTPUT:
@@ -1028,7 +1028,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformSha384Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformSha384Id;
 OUTPUT:
@@ -1036,7 +1036,7 @@ OUTPUT:
 
 xmlSecTransformId
 PerlxmlSecTransformSha512Id(self)
-   HV * self;
+__attribute((unused)) HV * self;
 CODE:
    RETVAL=xmlSecTransformSha512Id;
 OUTPUT:
