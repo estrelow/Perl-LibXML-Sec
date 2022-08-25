@@ -43,7 +43,7 @@ use constant xmlSecKeyDataTypeAny => 0xFFFF;
 
 our @ISA = qw(Exporter);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 require XSLoader;
 XSLoader::load('XML::LibXML::xmlsec', $VERSION);

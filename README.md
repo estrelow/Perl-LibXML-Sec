@@ -6,7 +6,7 @@ This modules provides glue for the XMLSec Library, as seen on https://www.alekse
 PREREQUISITES:
 
 You need a running xmlsec library installed on your system for this module to work.
-There are binaries available for several linux distributions.
+There are binaries available for several linux and FreeBSD distributions.
 
 Ubuntu: sudo aptitude install libxmlsec1-dev libxmlsec1-openssl
 
@@ -26,6 +26,10 @@ To install this module, run the following commands:
         make test
         make install
 
+BUGS
+
+There is a github space for this module at https://github.com/estrelow/Perl-LibXML-Sec.
+Please report bugs on github
 
 CREDITS
 
