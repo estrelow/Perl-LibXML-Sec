@@ -1,5 +1,8 @@
 Revision history for XML::LibXML::xmlsec
 
+  * Removed unneeded header files from distro.
+  * Added the /usr/local/include branch to the -I rule
+
 0.03 2022-08-24
 
   * Applied unused gcc attribute in order to reduce -Wunused-variable warnings.

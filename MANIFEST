@@ -2,6 +2,7 @@ LICENSE
 Makefile.PL
 MANIFEST
 README.md
+Changes
 lib/XML/LibXML/xmlsec.pm
 xmlsec.xs
 globals.h
