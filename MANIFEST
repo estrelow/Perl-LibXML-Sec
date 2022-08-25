@@ -4,10 +4,8 @@ MANIFEST
 README.md
 lib/XML/LibXML/xmlsec.pm
 xmlsec.xs
-perl-libxml-mm.h
-app.h
-crypto.h
 globals.h
+perl-libxml-mm.h
 typemap
 crypto.c
 META.json

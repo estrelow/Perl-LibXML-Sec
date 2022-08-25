@@ -1,0 +1,7 @@
+Revision history for XML::LibXML::xmlsec
+
+0.03 2022-08-24
+
+  * Applied unused gcc attribute in order to reduce -Wunused-variable warnings.
+  * Changed the INC rule in Makefile.PL so win32 compiler face different set.
+

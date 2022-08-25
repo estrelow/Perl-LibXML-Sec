@@ -11,7 +11,7 @@ if ($^O eq 'MSWin32') {
    $inc='-I. -IC:/mingw/x86_64-w64-mingw32/include/  -Ic:/mingw/include/';
 } else {
    $libs='-L/usr/local/lib -lxmlsec1-openssl -lxmlsec1 -lltdl  -lxml2    -lssl -lcrypto';
-   $inc='-I. -I/usr/include/libxml2 -I/usr/include/xmlsec1';
+   $inc='-I. -I/usr/include/libxml2 -I/usr/include/xmlsec1 -I/usr/local/include/libxml2 -I/usr/local/include/xmlsec1';
 }
 
 WriteMakefile(
