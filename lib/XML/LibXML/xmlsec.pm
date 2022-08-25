@@ -371,7 +371,7 @@ XML::LibXML::xmlsec - XML signing/encription using xmlsec library
 
 =head1 DESCRIPTION
 
-XML::LibXML::xmlsec is a bind module for xmlsec, a C library aimed for XML digital signature and encryption
+XML::LibXML::xmlsec is a bind module for L<xmlsec|https://www.aleksey.com/xmlsec/>, a C library aimed for XML digital signature and encryption
 as described in W3C standards.
 
 
@@ -416,7 +416,7 @@ Returns the modified xml document
 
 =head2 signdoc
 
-   $signer->signdoc($xmldoc, %options);
+   signdoc($xmldoc, %options);
 
 signdoc will compute the digital signature and then add it as contents to the XML document.
 The argument is expected to be a signature envelope as a well behaved L<LibXML::Document|https://metacpan.org/pod/distribution/XML-LibXML/lib/XML/LibXML/Document.pod>
@@ -438,7 +438,7 @@ The options are as follows
 
 id-attr and id-node are provided as tweaks in order to be able to sign a DTD-less documents in the same way the option --id-attr works in xmlsec1 utility
 
-=head2 $signer->verifydoc($xmldoc, %options);
+=head2 verifydoc($xmldoc, %options);
 
 verifydoc will verify an already signed xmldoc. Options are alike the signdoc method.
 Will return 1 if verification is correct.
@@ -504,6 +504,10 @@ interact with any Crypt or OpenSSL perl module.
 
 xmlsec has a strong libxml2 binding. This module will accept XML::LibXML handles, but in turn
 will do processing in the underlying xmlsec/libxml2 C libraries.
+
+=item *
+
+xmlsec has several ways for customizing and populating KeyInfo elements. That feature is on the TODO.
 
 =back
 
