@@ -43,7 +43,7 @@ use constant xmlSecKeyDataTypeAny => 0xFFFF;
 
 our @ISA = qw(Exporter);
 
-our $VERSION = '0.04';
+our $VERSION = '0.14';
 
 require XSLoader;
 XSLoader::load('XML::LibXML::xmlsec', $VERSION);
@@ -202,12 +202,8 @@ sub signdoc() {
    $self->xmlSecIdAttrTweak($doc,$id_attr,$id_node);
 
    my $r;
-   if ($start) {
-      $r=$self->XmlSecSign($doc,$self->{_keymgr},$start);
-   } else {
-      $start=($doc->findnodes("//$id_node\[\@$id_attr='$id']"))[0];
-      $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id);
-   }
+   $start=($doc->findnodes("//$id_node\[\@$id_attr='$id']"))[0] unless ($start);
+   $r=$self->XmlSecSignDoc($doc,$self->{_keymgr},$id);
 
    return $doc unless ($self->{x509});
 
