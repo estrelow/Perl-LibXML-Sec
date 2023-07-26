@@ -571,11 +571,12 @@ CODE:
 
 
 int 
-XmlSecVerify(self,doc,mgr, id)
+XmlSecVerify(self,doc,mgr, id, node)
    HV * self        
    SV * doc
    IV mgr
    xmlChar * id
+   SV * node
 PREINIT:
    dMY_CXT;
 CODE:
@@ -592,7 +593,6 @@ CODE:
    int ret=0;
    xmlDocPtr real_doc;
    xmlAttrPtr attr;
-   xmlNodePtr startNode;
 
    if (id == NULL) {
 	   croak( "id must be specified");
@@ -612,12 +612,7 @@ CODE:
 	   croak("Error: failed to get libxml doc");
    }
 
-   attr = xmlGetID(real_doc, id);
-	if (attr == NULL)	{
-		croak("Error: xmlsec fail to find starting node");
-	}
-
-   startNode = xmlSecFindNode(attr->parent, "Signature", "http://www.w3.org/2000/09/xmldsig#");
+   xmlNodePtr startNode= PmmSvNodeExt(node,0);
 
    if (startNode == NULL)
    {

@@ -245,7 +245,7 @@ sub verifydoc($$%) {
    $self->xmlSecIdAttrTweak($doc,$id_attr,$id_node);
 
    my $r;
-   $r=$self->XmlSecVerify($doc,$self->{_keymgr},$id);
+   $r=$self->XmlSecVerify($doc,$self->{_keymgr},$id,$start);
 
    if ($r == xmlSecDSigStatusSucceeded) {
 	   return 1;
